@@ -2,19 +2,37 @@ module utils
 
 import java.lang.Math.*
 
-// Maximum of two comparable values.
-public def max (a, b) {
-    mux (a.compareTo(b) > 0 ) { a } else { b }
-}
-
-// Minimum of two comparable values.
-public def min (a, b) {	
-    mux (a.compareTo(b) < 0 ) { a } else { b }
-}
+// GEOMETRICAL FUNCTIONS
+/////////////////////////
 
 // Euclidean norm of a two-dimensional vector.
 public def norm(v) {
-    sqrt(v.get(0)*v.get(0) + v.get(1)*v.get(1))
+    sqrt(pow(v.get(0), 2) + pow(v.get(1), 2))
+}
+
+// Euclidean norm elevated to the p-th power.
+public def powNorm(v, p) {
+    pow(pow(v.get(0), 2) + pow(v.get(1), 2), p/2)
+}
+
+// Crop a coordinate to fit into a rectangle.
+public def cropRectangle(x, low, hi) {
+    [min(max(x.get(0), low.get(0)), hi.get(0)), 
+     min(max(x.get(1), low.get(1)), hi.get(1))]
+}
+
+// Project x to fit within circle of center c and radius r. 
+public def cropCircle(x, c, r) {
+	let d = x - c;
+    if (pow(d.get(0), 2) + pow(d.get(1), 2) < pow(r,2)) { x } else {
+		c + (d / norm(d) * r)
+    }
+}
+
+// Uniform random vector of norm up to r.
+public def randVector(r) {
+    let theta = 2*pi*self.nextRandomDouble();
+    sqrt(self.nextRandomDouble()) * r * [cos(theta),sin(theta)]
 }
 
 // Random vector within the rectangle bounded by points "lo" and "hi".
@@ -25,9 +43,133 @@ public def randRect(lo, hi) {
 
 // Returns a goal by applying function "goal", and regenerates it whenever
 // the distance from the current goal drops below "mindist".
-public def ifClose(goal, mindist) {
+public def ifClose(goal, dist) {
     rep (x <- goal.apply()) {
-        mux (norm(self.getCoordinates() - x) <= mindist) 
+        if (self.distanceTo(x) <= dist) 
         { goal.apply() } else { x }
     }
+}
+
+// Walk to random targets within a rectangle of given size, changing targets within reach.
+public def rectangleWalk(rectSize, reach) {
+	let target = if (env.has('dspace')) {
+		let dspace = env.get('dspace');
+		if (dspace == 0) {
+			cropRectangle(self.getCoordinates(), [0,0], rectSize)
+		} else {
+			ifClose(() -> {cropRectangle(self.getCoordinates()+randVector(dspace), [0,0], rectSize)}, reach)
+		}
+	} else {randRect([0,0], rectSize)};
+	env.put('target', target)
+}
+
+// MATHEMATICAL FUNCTIONS
+/////////////////////////
+
+// Identity function.
+public def identity(v) {
+	v
+}
+
+// Maximum of two comparable values.
+public def max(a, b) {
+    mux (a.compareTo(b) > 0 ) { a } else { b }
+}
+
+// Minimum of two comparable values.
+public def min(a, b) {	
+    mux (a.compareTo(b) < 0 ) { a } else { b }
+}
+
+// NEIGHBOURHOOD FUNCTIONS
+//////////////////////////
+
+// Selects the value for self from a field.
+public def pickHood(field) {
+	let id = self.getDeviceUID().getId();
+	sumHood(mux (id == nbr(id)) {field} else {0})
+}
+
+// Count number of neighbours.
+public def countHood(cond) { 
+	sumHood(mux (cond) { 1 } else { 0 })
+}
+
+// Fold field with function.
+public def foldHood(func, field, default) {
+	hood((a, b) -> { func.apply(a, b) }, default, field)
+}
+
+// Minimum among neighbours' values and a local value.
+public def minHoodLoc(field, local) {	
+	min(minHood(field), local);
+}
+
+// LIST FUNCTIONS
+/////////////////
+
+// Python-style list [0,...,n-1].
+public def range(n) {
+    if (n == 0) { [] } else { range(n-1).append(n-1) }
+}
+
+// Split list in two halves.
+public def split(t) {
+    [t.subTupleStart(t.size()/2), t.subTupleEnd(t.size()/2)]
+}
+
+// Append the elements of the list at the end, doubling the list itself.
+public def dup(t) {
+    t.mergeAfter(t.map(self, (x)->{0}))
+}
+
+// TIME FUNCTIONS
+/////////////////
+
+// True if event happened not more than timeout time ago.
+public def recently(event, timeout) {
+	if (rep (hasHappenedBefore <- false) { hasHappenedBefore || event }) {
+	    if (event) { true } else {
+	        rep (v <- timeout) {v - self.getDeltaTime()} > 0
+	    }
+	} else { false }
+}
+
+// True once every frequency rounds.
+public def clockCounter(frequency) {    
+    if (rep (x<-0) {x+1} % frequency == 0) {true} else {false}
+}
+
+// Count up to max, increasing every step time.
+public def stepCounter(step, max) {
+	if (step == 0) {0} else {floor(self.getCurrentTime()/step)} % max
+}
+
+// How much val changes between consecutive rounds.
+public def roundDiff(val) {
+	rep (x <- [Infinity, Infinity]) {[val-x.get(1), val]}.get(0)
+}
+
+// How much time since when a value changed by more than err.
+public def repCounter(val, err) {
+    rep (x <- [0, NaN]) {
+        [if (abs(val-x.get(1)) <= err) {x.get(0)+self.getDeltaTime()} else {0},val]
+    }.get(0)
+}
+
+// Mean value every frequency time.
+public def meanCounter(val, frequency) {
+    let time = self.getCurrentTime();
+    let dt = if (self.getDeltaTime() == 0) {time} else {self.getDeltaTime()};
+    let null = [0, 0];
+    let count = rep (x <- null) {
+            let restart = rep (t <- [false, time]) {
+                    [floor(time/frequency) > floor(t.get(1)/frequency), time]
+            }.get(0);
+            let old = if (restart) {null} else {x};
+            if (-Infinity < val && val < Infinity) {
+                    old + [val*dt, dt]
+            } else {old}
+    };
+    count.get(0)/count.get(1)
 }

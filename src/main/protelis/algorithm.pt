@@ -1,34 +1,118 @@
 module algorithm
 
+import java.lang.Double.* 
+import java.lang.Math.*
 import utils
-
-// Relative Metric with given error "err".
-public def relRange(err) {
-	let cur = self.getCoordinates();
-	let prev = rep (x <- [cur, cur]) {
-		[cur, x.get(0)]
-	}.get(1);
-	let f = mux (self.getDeltaTime() == 0) {0} else {self.nbrLag() / self.getDeltaTime()};
-	norm(cur * (1-f) + prev * f  - nbr(cur)) * (1 - err + self.nextRandomDouble() * 2 * err)
-}
-
-// Absolute Metric with given error "err".
-public def absRange(err) {
-	let cur = self.getCoordinates();
-	norm(cur  - nbr(cur)) * (1 - err + self.nextRandomDouble() * 2 * err)
-}
 
 /**
  * Classic Distance Estimation
  *
  * @param source  	whether the device is a source
- * @param metric  	metric function
- * @param err		error of the metric function
- * @param v			maximum movement speed
  * @return       	estimated distance
  */
-public def G(source, metric, err, v) {
+public def G_STD(source) {
 	rep (old <- Infinity) {
-		mux (source) {0} else {minHood(old + metric.apply(err) + v * self.nbrLag())}
+		mux (source) {0} else {minHood(old + self.nbrRange())}
 	}
+}
+
+/**
+ * Bounded Information Speed Distance Estimation
+ *
+ * @param source  	whether the device is a source
+ * @param speed		average communication speed
+ * @param radius		communication radius
+ * @return       	estimated distance
+ */
+public def G_BIS(source, speed, radius) {
+	rep (old <- [Infinity, Infinity]) {
+		mux (source) {[0,0]} else {
+			let dx = old.get(0) + self.nbrRange();
+			let dt = old.get(1) + self.nbrLag();
+			minHood([max(dx, dt*speed-radius), dt])
+		}
+	}.get(0)
+}
+
+/**
+ * Single-Path Summation
+ *
+ * @param dist  		distance from the source
+ * @param value		value to be added
+ */
+public def C_SP(dist, value) {
+    let id = self.getDeviceUID().getId();
+    rep (old <- [value, id]) {
+        let nbrValues = mux (old.get(1) == id) { old.get(0) } else { 0 };
+        [value + sumHood(nbrValues), minHood PlusSelf(nbr([dist, id])).get(1)]
+    }.get(0)
+}
+
+/**
+ * Multi-Path Summation
+ *
+ * @param dist  		distance from the source
+ * @param value		value to be added
+ */
+public def C_MP(dist, value) {
+    rep (old <- [value, value]) {
+    		let nbrValues = mux (nbr(dist) > dist) { old.get(1) } else { 0 };
+		let newValue = value + sumHood(nbrValues);
+		[newValue, newValue / max(countHood(nbr(dist) < dist), 1)]
+    }.get(0)
+}
+
+/**
+ * Weighted Multi-Path Summation
+ *
+ * @param dist  		distance from the source
+ * @param value		value to be added
+ * @param radius		communication radius
+ */
+public def C_MPW(dist, value, radius) {
+    rep (old <- value) {
+        let nbrVals = old * normalize(goodness(dist, radius));
+        value + sumHood(nbrVals)
+    }
+}
+// normalizes a signed goodness
+def normalize(gdn) {
+    let getFrom = mux (gdn > 0) {  gdn } else { 0 };
+    let sendTo  = mux (gdn < 0) { -gdn } else { 0 };
+    let N = nbr(sumHood(sendTo));
+    mux (N != 0) { getFrom / N } else { 0 }
+} 
+// signed goodness, for distinguishing send and receive
+def goodness(dist, radius) {
+	let d = max(radius - self.nbrRange(), 0);
+	let p = mux (isInfinite(dist) || nbr(isInfinite(dist))) { 0 } else { nbr(dist) - dist };
+    	d * p
+}
+
+/**
+ * Devices compete against one another to become local leaders,
+ * resulting  in  a  random  Voronoi  partition  with  a  characteristic
+ * grain size.
+ *
+ * @param grain  	num, partition dimension
+ * @param algorithm	num, gradient algorithm used
+ * @param radius 	num, communication radius
+ * @return       	tuple, with distance from leader and leader UID
+ */
+public def S(grain, algorithm, radius) {
+	let id = self.getDeviceUID().getId();
+    rep (old <- id) {
+    		let lead = pickHood(old);
+    		let d = G_STD(id == lead);
+	    mux (d > grain) {
+	        id
+	    } else {
+		    	let dist = self.nbrRange() + nbr(d);
+		    	minHood PlusSelf(mux (dist > grain || dist == 0) {
+		    		[Infinity, lead] // leader farther than grain is unacceptable
+		    	} else {
+		    		[mux (dist < grain / 2) { 0 } else { dist }, nbr(lead)]
+		    	}).get(1)
+	    }
+    }
 }
