@@ -1,0 +1,136 @@
+incarnation: protelis
+
+variables:
+  space_variability: &space_variability
+    min: 0
+    max: 1
+    step: 0.5
+    default: 0.5
+  time_or_noise: &time_or_noise
+    min: 0
+    max: 1
+    step: 1
+    default: 1
+  random: &random
+    min: 0
+    max: 9
+    step: 1
+    default: 0
+  dspace: &dspace
+    formula: "2*$space_variability + ($space_variability==1 ? 1 : 0)"
+  dtime: &dtime
+    formula: "$time_or_noise/2"
+  speed: &speed
+    formula: "$dspace/3"
+  vibr: &vibr
+    formula: "$time_or_noise/10"
+
+seeds:
+  scenario: *random
+  simulation: *random
+
+export:
+  - time
+  - molecule: classic-err
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: classic-diff
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: flex-err
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: flex-diff
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: crf-err
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: crf-diff
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: bis50-err
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: bis50-diff
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: bisflex50-err
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: bisflex50-diff
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: bis90-err
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: bis90-diff
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: bisflex90-err
+    aggregators: [mean]
+    value-filter: onlyfinite
+  - molecule: bisflex90-diff
+    aggregators: [mean]
+    value-filter: onlyfinite
+
+network-model:
+  type: EuclideanDistance
+  parameters: [1]
+  
+pools:
+  - pool: &program
+    - time-distribution:
+        type: RandomWeibullTime
+        parameters: [1, *dtime, *dtime]
+      type: Event
+      actions:
+        - type: RunProtelisProgram
+          parameters: [performance, 3]
+    - program: send
+  - pool: &vibrate
+    - time-distribution: 1
+      type: Event
+      actions:
+        - type: BrownianMove
+          parameters: [*vibr]
+  - pool: &move
+    - time-distribution: 10
+      type: Event
+      actions:
+        - type: MoveToTarget
+          parameters: [target, *speed]
+
+displacements:
+  - in:
+      type: Point
+      parameters: [0, 1]
+    contents:
+      - molecule: dspace
+        concentration: *dspace
+      - molecule: dtime
+        concentration: *dtime
+    programs:
+      - *program
+  - in:
+      type: Point
+      parameters: [50, 1]
+    contents:
+      - molecule: dspace
+        concentration: *dspace
+      - molecule: dtime
+        concentration: *dtime
+    programs:
+      - *program
+  - in:
+      type: Rectangle
+      parameters: [998, 0, 0, 50, 2]
+    contents:
+      - molecule: dspace
+        concentration: *dspace
+      - molecule: dtime
+        concentration: *dtime
+    programs: 
+      - *program
+      - *move
+      - *vibrate
