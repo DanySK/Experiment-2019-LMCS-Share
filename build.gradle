@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenCentral()
+}
+
+eclipse {
+    classpath {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+dependencies {
+    compile 'it.unibo.alchemist:alchemist:7.0.2'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main/java'
+            srcDirs 'src/main/resources'
+            srcDirs 'src/main/protelis'
+            srcDirs 'src/main/yaml'
+        }
+    }
+}

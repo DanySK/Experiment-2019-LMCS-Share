@@ -1,0 +1,34 @@
+module algorithm
+
+import utils
+
+// Relative Metric with given error "err".
+public def relRange(err) {
+	let cur = self.getCoordinates();
+	let prev = rep (x <- [cur, cur]) {
+		[cur, x.get(0)]
+	}.get(1);
+	let f = mux (self.getDeltaTime() == 0) {0} else {self.nbrLag() / self.getDeltaTime()};
+	norm(cur * (1-f) + prev * f  - nbr(cur)) * (1 - err + self.nextRandomDouble() * 2 * err)
+}
+
+// Absolute Metric with given error "err".
+public def absRange(err) {
+	let cur = self.getCoordinates();
+	norm(cur  - nbr(cur)) * (1 - err + self.nextRandomDouble() * 2 * err)
+}
+
+/**
+ * Classic Distance Estimation
+ *
+ * @param source  	whether the device is a source
+ * @param metric  	metric function
+ * @param err		error of the metric function
+ * @param v			maximum movement speed
+ * @return       	estimated distance
+ */
+public def G(source, metric, err, v) {
+	rep (old <- Infinity) {
+		mux (source) {0} else {minHood(old + metric.apply(err) + v * self.nbrLag())}
+	}
+}

@@ -1,0 +1,6 @@
+/.gradle/
+/bin/
+/data/raw/
+data/*.v*/
+TRASH/
+.DS_Store

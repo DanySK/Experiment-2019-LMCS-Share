@@ -1,0 +1,33 @@
+module utils
+
+import java.lang.Math.*
+
+// Maximum of two comparable values.
+public def max (a, b) {
+    mux (a.compareTo(b) > 0 ) { a } else { b }
+}
+
+// Minimum of two comparable values.
+public def min (a, b) {	
+    mux (a.compareTo(b) < 0 ) { a } else { b }
+}
+
+// Euclidean norm of a two-dimensional vector.
+public def norm(v) {
+    sqrt(v.get(0)*v.get(0) + v.get(1)*v.get(1))
+}
+
+// Random vector within the rectangle bounded by points "lo" and "hi".
+public def randRect(lo, hi) {
+    [lo.get(0) + (hi.get(0)-lo.get(0))*self.nextRandomDouble(),
+    	 lo.get(1) + (hi.get(1)-lo.get(1))*self.nextRandomDouble()]
+}
+
+// Returns a goal by applying function "goal", and regenerates it whenever
+// the distance from the current goal drops below "mindist".
+public def ifClose(goal, mindist) {
+    rep (x <- goal.apply()) {
+        mux (norm(self.getCoordinates() - x) <= mindist) 
+        { goal.apply() } else { x }
+    }
+}

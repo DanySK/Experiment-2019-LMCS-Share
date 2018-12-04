@@ -1,0 +1,122 @@
+incarnation: protelis
+
+variables:
+
+  rhol: &rhol     # density level
+    min: 22
+    max: 50
+    step: 2
+    default: 30
+  ratel: &ratel   # frequency level
+    min: 0
+    max: 2
+    step: 1
+    default: 1
+  error: &error   # metric error
+    min: 0
+    max: 1.01
+    step: 0.05
+    default: 0.2
+  random: &random # random seed
+    min: 0
+    max: 4
+    step: 1
+    default: 0
+    
+  num: &num                 # number of devices
+    formula: "$rhol * $rhol"
+  rate: &rate               # period length
+    formula: "$ratel == 0 ? 0.2 : $ratel == 1 ? 1 : 5"
+
+  endtime: &endtime         # end of the simulation after 20 rounds
+    formula: "20 * $rate"
+  drate: &drate             # 10% error in period length 
+    formula: "0.1 * $rate"
+  retain: &retain           # values are deemed obsolete after 1.5 rounds
+    formula: "1.5 * $rate"
+  step: &step               # counteract Alchemist's bug on GPS coordinates
+    formula: "1.5 * $rate * $rate"
+  speed: &speed             # 1.5 m/s in vienna longitude/latitude
+    formula: "0.000020242"
+  radius: &radius           # communication radius
+    formula: "50"
+    
+seeds:
+  scenario: *random
+  simulation: *random
+ 
+# Values exported for Figure 6
+export:
+  - time                          # time elapsed since start
+  - molecule: num                 # number of devices
+    aggregators: [max]
+  - molecule: absolute_upper-err  # theoretical upper bound
+    aggregators: [max]
+  - molecule: absolute_90-err     # 90-th percentile of relative errors with absolute metric
+    aggregators: [percentile90]
+  - molecule: absolute_70-err     # 70-th percentile of relative errors with absolute metric
+    aggregators: [percentile70]
+  - molecule: absolute_50-err     # 50-th percentile of relative errors with absolute metric
+    aggregators: [median]
+  - molecule: absolute_30-err     # 30-th percentile of relative errors with absolute metric
+    aggregators: [percentile30]
+  - molecule: absolute_10-err     # 10-th percentile of relative errors with absolute metric
+    aggregators: [percentile10]
+  - molecule: absolute_lower-err  # theoretical upper bound
+    aggregators: [max]
+
+# Sets the end time of the simulation.
+terminate:
+  - type: Terminator
+    parameters: [*endtime]
+
+# Loads the Vienna city map and sets the communication radius.
+environment:
+  type: OSMEnvironment
+  parameters: ["/vcm.pbf", false]
+   
+network-model:
+  type: EuclideanDistance
+  parameters: [*radius]
+
+pools:
+  - pool: &program
+    - time-distribution:
+        # perform rounds according to a Weibull distribution of "rate" mean and deviation "drate" within devices and across devices
+        type: WeibullDistributedWeibullTime
+        parameters: [*rate, *drate, *drate]
+      type: Event
+      actions:
+        # run the "isolation" field calculus program 
+        - type: RunProtelisProgram
+          parameters: [isolation, *retain]
+        # follow the target with fixed speed (step each turn)
+        - type: TargetWalker
+          parameters: [target, *step]
+    - program: send
+  - pool: &deviceContent # makes simulation parameters available in the program
+      - molecule: err
+        concentration: *error
+      - molecule: num
+        concentration: *num
+      - molecule: speed
+        concentration: *speed
+      - molecule: rate
+        concentration: *rate
+
+# Initial displacements of devices 
+displacements:
+  # source device
+  - in:
+      type: Point
+      parameters: [48.208, 16.375] # center of the area
+    programs:
+      - *program
+    contents: *deviceContent
+  # other devices
+  - in:
+      type: Rectangle
+      parameters: [*num, 48.205, 16.37, 0.006, 0.01] # 667.2x741m
+    programs:
+      - *program
+    contents: *deviceContent

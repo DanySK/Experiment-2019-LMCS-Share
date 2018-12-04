@@ -1,0 +1,48 @@
+module isolation
+
+import custom.Geometry.*
+
+import utils
+import algorithm
+
+// Exports the relative error of "value" with respect to "trueval" (ignoring an additive term "delta").
+def report(name, value, delta, trueval, upper, lower) {
+	let error = if (value == trueval) {1} else {
+		if (value < trueval) {value} else {max(value-delta, trueval)}/trueval
+	};
+	env.put(name+"_upper-err", upper);
+	env.put(name+"_90-err", error);
+	env.put(name+"_70-err", error);
+	env.put(name+"_50-err", error);
+	env.put(name+"_30-err", error);
+	env.put(name+"_10-err", error);
+	env.put(name+"_lower-err", lower);
+}
+
+// The source of distance estimations is device 0.
+let source = self.getDeviceUID().getId() == 0;
+env.put('source', source);
+
+// Determines random targets for non-source devices.
+if (source) {NaN} else {
+	env.put("target", ifClose(() -> {randRect([48.205, 16.37], [48.211, 16.38])}, 0.000001));
+};
+
+// Stores simulation parameters and computes distances (exact and estimated through various metrics).
+let err       = env.get('err');
+let num       = env.get('num');
+let v         = env.get('speed');
+let rate      = env.get('rate');
+let m         = v / 1.5; // length of a meter in GPS coordinate system
+let trueDist  = norm(self.getCoordinates() - [16.375, 48.208]);
+let absDist   = G(source, absRange, err, 0);
+let relDist   = G(source, relRange, err, v);
+
+// Exports error data for simulation graphs.
+report('absolute', absDist, 0,        trueDist, rep (x <- absError(err, num, rate)) {x}, 1-err);
+report('relative', relDist, 4*v*rate, trueDist, rep (x <- relError(err, num, rate)) {x}, 1-err);
+
+// Exports distance estimates in meters for screenshots.
+env.put("td", trueDist/m);
+env.put("ad", absDist/m);
+env.put("rd", relDist/m);
