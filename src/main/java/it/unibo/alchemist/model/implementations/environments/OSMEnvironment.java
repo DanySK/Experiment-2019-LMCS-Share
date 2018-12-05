@@ -481,7 +481,7 @@ public class OSMEnvironment<T> extends Continuous2DEnvironment<T> implements Map
             }
         }).filter(Optional::isPresent).map(Optional::get).findFirst();
         if (error.isPresent()) {
-            throw new IllegalStateException("A error occurred during initialization.", error.get());
+            throw new IllegalStateException("An error occurred during initialization.", error.get());
         }
     }
 
@@ -489,7 +489,7 @@ public class OSMEnvironment<T> extends Continuous2DEnvironment<T> implements Map
         final String code = Hex.encodeHexString(Hashes.hashResource(mapfile, e -> {
             throw new IllegalStateException(e);
         }).asBytes());
-        final String append = SLASH + code;
+        final String append = SLASH + code + "v3";
         final String[] prefixes = new String[] { PERSISTENTPATH, System.getProperty("java.io.tmpdir"),
                 System.getProperty("user.dir"), "." };
         String dir = prefixes[0] + append;
@@ -532,15 +532,25 @@ public class OSMEnvironment<T> extends Continuous2DEnvironment<T> implements Map
         initAll(mapResource);
     }
 
-    private static synchronized GraphHopperAPI initNavigationSystem(final File mapFile, final String internalWorkdir, final Vehicle v) throws IOException {
-        return new GraphHopperOSM().setOSMFile(mapFile.getAbsolutePath()).forDesktop()
-                .setElevation(false)
-                .setEnableInstructions(false)
-                .setEnableCalcPoints(true)
-                .setInMemory()
-                .setGraphHopperLocation(internalWorkdir)
-                .setEncodingManager(new EncodingManager(v.toString().toLowerCase(Locale.US)))
-                .importOrLoad();
+    private static synchronized GraphHopperAPI initNavigationSystem(final File mapFile, final String internalWorkdir, final Vehicle v) {
+        try {
+            return new GraphHopperOSM().setOSMFile(mapFile.getAbsolutePath()).forDesktop()
+                    .setElevation(false)
+                    .setEnableInstructions(false)
+                    .setEnableCalcPoints(true)
+                    .setInMemory()
+                    .setGraphHopperLocation(internalWorkdir)
+                    .setEncodingManager(new EncodingManager(v.toString().toLowerCase(Locale.US)))
+                    .importOrLoad();
+        } catch (IllegalStateException e) {
+            if (e.getMessage().contains("Encoding does not match")) {
+                for (File f: new File(internalWorkdir).listFiles()) {
+                    f.delete();
+                }
+                return initNavigationSystem(mapFile, internalWorkdir, v);
+            }
+            throw e;
+        }
     }
 
     private static boolean mkdirsIfNeeded(final File target) {
