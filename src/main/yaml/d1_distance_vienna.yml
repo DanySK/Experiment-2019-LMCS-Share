@@ -28,8 +28,6 @@ variables:
   rate: &rate               # period length
     formula: "$ratel == 0 ? 0.2 : $ratel == 1 ? 1 : 5"
 
-  endtime: &endtime         # end of the simulation after 20 rounds
-    formula: "20 * $rate"
   drate: &drate             # 10% error in period length 
     formula: "0.1 * $rate"
   retain: &retain           # values are deemed obsolete after 1.5 rounds
@@ -44,11 +42,6 @@ variables:
 seeds:
   scenario: *random
   simulation: *random
-
-# Sets the end time of the simulation.
-terminate:
-  - type: Terminator
-    parameters: [*endtime]
 
 # Loads the Vienna city map and sets the communication radius.
 environment:
