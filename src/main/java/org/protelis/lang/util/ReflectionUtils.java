@@ -201,8 +201,8 @@ public final class ReflectionUtils {
             if (best.isPresent()) {
                 return best.get();
             }
+            throw new IllegalStateException(e);
         }
-        throw new IllegalStateException();
     }
 
     private static int computePointsForWrapper(final Class<?> primitive, final Class<?> wrapper) {
