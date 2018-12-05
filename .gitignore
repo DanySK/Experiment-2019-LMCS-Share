@@ -4,3 +4,9 @@
 data/*.v*/
 TRASH/
 .DS_Store
+/build/
+out/
+.idea/
+hs_err_pid*.log
+org.eclipse.buildship.core.prefs
+.project
