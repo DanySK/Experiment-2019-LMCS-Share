@@ -10,3 +10,4 @@ out/
 hs_err_pid*.log
 org.eclipse.buildship.core.prefs
 .project
+.classpath
