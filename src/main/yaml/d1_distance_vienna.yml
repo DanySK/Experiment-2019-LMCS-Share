@@ -44,26 +44,6 @@ variables:
 seeds:
   scenario: *random
   simulation: *random
- 
-# Values exported for Figure 6
-export:
-  - time                          # time elapsed since start
-  - molecule: num                 # number of devices
-    aggregators: [max]
-  - molecule: absolute_upper-err  # theoretical upper bound
-    aggregators: [max]
-  - molecule: absolute_90-err     # 90-th percentile of relative errors with absolute metric
-    aggregators: [percentile90]
-  - molecule: absolute_70-err     # 70-th percentile of relative errors with absolute metric
-    aggregators: [percentile70]
-  - molecule: absolute_50-err     # 50-th percentile of relative errors with absolute metric
-    aggregators: [median]
-  - molecule: absolute_30-err     # 30-th percentile of relative errors with absolute metric
-    aggregators: [percentile30]
-  - molecule: absolute_10-err     # 10-th percentile of relative errors with absolute metric
-    aggregators: [percentile10]
-  - molecule: absolute_lower-err  # theoretical upper bound
-    aggregators: [max]
 
 # Sets the end time of the simulation.
 terminate:
@@ -89,7 +69,7 @@ pools:
       actions:
         # run the "isolation" field calculus program 
         - type: RunProtelisProgram
-          parameters: [isolation, *retain]
+          parameters: [isolation_old, *retain]
         # follow the target with fixed speed (step each turn)
         - type: TargetWalker
           parameters: [target, *step]
