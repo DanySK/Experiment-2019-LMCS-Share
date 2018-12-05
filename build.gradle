@@ -12,6 +12,9 @@ eclipse {
     }
 }
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 dependencies {
     compile 'it.unibo.alchemist:alchemist:7.0.2'
 }
@@ -26,3 +29,13 @@ sourceSets {
         }
     }
 }
+
+void makeExperiment(file) {
+    task "$file"(type: JavaExec) {
+        classpath = sourceSets.main.runtimeClasspath
+        classpath 'src/main/protelis'
+        main = 'it.unibo.alchemist.Alchemist'
+        args("-y", "src/main/yaml/${file}.yml", "-g", "src/main/resources/${file}.aes")
+    }
+}
+makeExperiment("d1_distance_vienna")
