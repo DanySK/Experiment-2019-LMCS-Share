@@ -35,8 +35,8 @@ let v         = env.get('speed');
 let rate      = env.get('rate');
 let m         = v / 1.5; // length of a meter in GPS coordinate system
 let trueDist  = norm(self.getCoordinates() - [16.375, 48.208]);
-let absDist   = G(source, absRange, err, 0);
-let relDist   = G(source, relRange, err, v);
+let absDist   = G_STD(source);
+let relDist   = G_STD(source);
 
 // Exports error data for simulation graphs.
 report('absolute', absDist, 0,        trueDist, rep (x <- absError(err, num, rate)) {x}, 1-err);
