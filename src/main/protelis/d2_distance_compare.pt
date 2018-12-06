@@ -1,8 +1,8 @@
-module performance
+module d2_distance_compare
 
 import java.lang.Math.*
 import utils
-import gradients
+import algorithm
 
 
 def trueDist() {
@@ -12,8 +12,8 @@ def trueDist() {
 
 let batchFreq = 10;
 let id = self.getDeviceUID().getId();
-let sourceId = if (self.getCurrentTime() < 300) {0} else {1};
-let source = if (id == sourceId) {0} else {Infinity};
+let sourceId = if (self.getCurrentTime() % 300 < 150 ) { 0 } else { 1 };
+let source = id == sourceId;
 let dspace = env.get("dspace");
 let dtime = env.get("dtime");
 let v = if (dtime==0) {0.461} else {0.889} + dspace/6;
@@ -21,11 +21,6 @@ let v = if (dtime==0) {0.461} else {0.889} + dspace/6;
 env.put("truedist", trueDist());
 env.put("round", 	rep (x<-0) {x+1});
 env.put("target", ifClose(() -> {cropRectangle(self.getCoordinates()+randVector(dspace), [0,0], [50,2])}, 0.05));
-
-reporter("classic",	STD(source),							trueDist, batchFreq);
-reporter("flex",	FLEX(source, 0.1, 10, 0.2, 1),			trueDist, batchFreq);
-reporter("crf",		CRF(source, 1, 1, 1/6, 0, 1),			trueDist, batchFreq);
-reporter("bis50", 	BIS(source, 1, 1, v*0.5, 0, 1),			trueDist, batchFreq);
-reporter("bisflex50",BIS(source, 1, 1, v*0.5, 0.1, 10),		trueDist, batchFreq);
-reporter("bis90", 	BIS(source, 1, 1, v*0.9, 0, 1),			trueDist, batchFreq);
-reporter("bisflex90",BIS(source, 1, 1, v*0.9, 0.1, 10),		trueDist, batchFreq);
+env.put("source", source);
+env.put("classic",	G_STD(source));
+env.put("bis", 	G_BIS(source, 1, 1));

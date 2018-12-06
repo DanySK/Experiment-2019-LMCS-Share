@@ -29,51 +29,6 @@ seeds:
   scenario: *random
   simulation: *random
 
-export:
-  - time
-  - molecule: classic-err
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: classic-diff
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: flex-err
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: flex-diff
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: crf-err
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: crf-diff
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: bis50-err
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: bis50-diff
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: bisflex50-err
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: bisflex50-diff
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: bis90-err
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: bis90-diff
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: bisflex90-err
-    aggregators: [mean]
-    value-filter: onlyfinite
-  - molecule: bisflex90-diff
-    aggregators: [mean]
-    value-filter: onlyfinite
-
 network-model:
   type: EuclideanDistance
   parameters: [1]
@@ -81,12 +36,12 @@ network-model:
 pools:
   - pool: &program
     - time-distribution:
-        type: RandomWeibullTime
+        type: WeibullDistributedWeibullTime
         parameters: [1, *dtime, *dtime]
       type: Event
       actions:
         - type: RunProtelisProgram
-          parameters: [performance, 3]
+          parameters: [d2_distance_compare, 3]
     - program: send
   - pool: &vibrate
     - time-distribution: 1
