@@ -1,0 +1,54 @@
+module protelis:coord:sparsechoice3
+import java.lang.Math.abs
+import java.lang.Math.hypot
+import java.lang.Double.isFinite
+import protelis:coord:spreading
+import protelis:lang:utils
+import protelis:state:nonselfstabilizing:time
+import algorithm
+import utils
+
+/**
+ * Devices compete against one another to become local leaders,
+ * resulting  in  a  random  Voronoi  partition  with  a  characteristic
+ * grain size.
+ *
+ * @param grain  num, partition dimension
+ * @param metric () -> num, estimate distance from the leader
+ * @return       bool, true if the current device is the leader, false otherwise
+ */
+public def S(grain) {
+	let myid = self.getDeviceUID().getId();
+	let lead = singleLeader(myid);
+	let distanceToLeader = G_STD(lead == myid);
+    if (distanceToLeader < grain / 2) {
+    	lead
+    } else {
+    	S(grain)
+    }
+}
+
+def minChain(myid) {
+    rep (chain <- [myid]) {
+        let chains = unionHood(chain);
+        let neighborhood = unionHood(nbr(myid));
+        chains = chains.filter(self, it -> {
+            // prevent loops containing myself
+            !it.contains(myid)
+            // only a single neighbor 
+            && it.intersection(neighborhood).size() == 1
+        });
+        let candidate = chains.min([]);
+        if (candidate.isEmpty()) { [myid] } else {
+            if (candidate.head() < myid) {
+                candidate.append(myid)
+            } else {
+                [myid]
+            }
+        }
+    }
+}
+
+public def singleLeader(myid) {
+    minChain(myid).head()
+}

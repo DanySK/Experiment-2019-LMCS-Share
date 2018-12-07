@@ -55,7 +55,7 @@ public class RepCall<T> extends AbstractSATree<T, T> {
     @SuppressWarnings("unchecked")
 	@Override
     public void eval(final ExecutionContext context) {
-    		T oldVal;
+        T oldVal;
         if (isErased()) {
             /*
              * Evaluate the initial value for the field. This is either a
@@ -66,7 +66,7 @@ public class RepCall<T> extends AbstractSATree<T, T> {
             oldVal = (T) w.getAnnotation();
             checkForFields(oldVal);
         } else {
-        		oldVal = (T) getSuperscript();
+            oldVal = (T) getSuperscript();
         }
         Field nbr = context.getField(Functions.identity(), oldVal);
         context.putVariable(xName, nbr, true);
@@ -75,9 +75,9 @@ public class RepCall<T> extends AbstractSATree<T, T> {
         Object result = body.getAnnotation();
         T newVal;
         if (result instanceof Field) {
-        		newVal = (T) ((Field) result).getSample(context.getDeviceUID());
+            newVal = (T) ((Field) result).getSample(context.getDeviceUID());
         } else {
-        		newVal = (T) result;
+            newVal = (T) result;
         }
         context.putField(Functions.identity(), newVal);
         checkForFields(newVal);

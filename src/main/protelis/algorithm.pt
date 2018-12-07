@@ -99,7 +99,7 @@ def goodness(dist, radius) {
  * @param radius 	num, communication radius
  * @return       	tuple, with distance from leader and leader UID
  */
-public def S(grain, algorithm, radius) {
+public def S(grain) {
 	let id = self.getDeviceUID().getId();
     rep (old <- id) {
     		let lead = pickHood(old);

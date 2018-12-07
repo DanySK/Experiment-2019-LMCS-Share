@@ -1,0 +1,95 @@
+module protelis:coord:sparsechoice2
+import java.lang.Math.abs
+import java.lang.Math.hypot
+import java.lang.Double.isFinite
+import protelis:coord:spreading
+import protelis:lang:utils
+import protelis:state:nonselfstabilizing:time
+import algorithm
+import utils
+
+def breakUsingUids(uid, grain, metric) {
+    if (isFinite(grain)) {
+    	let myId = self.getDeviceUID().getId();
+        rep (lead <- uid) {
+        	let realLead = minHood PlusSelf(mux (nbr(myId) == myId) { lead } else { Infinity });
+		    env.put("realLead", realLead);
+            distanceCompetition(uid == realLead, realLead, uid, grain, metric)
+        }
+    } else {
+        singleLeader(uid)
+    }
+}
+
+def distanceCompetition(isLeading, lead, uid, grain, metric) {
+    let d = G_STD(isLeading);
+    env.put("distanceToLead", d);
+    mux (d > grain || !isFinite(d)) {
+        uid
+    } else {
+        let dist = metric.apply() + nbr(d);
+        /*
+         * Do not consider devices that announce distance zero
+         */
+        dist = mux(dist > 0) { dist } else { Infinity };
+	    env.putField("candidates", dist);
+        env.putField("filtercand", mux (dist > grain) {
+            /*
+             * You are not carrying a valuable information on leadership if the distance
+             * from the leader you propose is farther than a grain.
+             */
+            [Infinity, lead]
+        } else {
+//	            [mux (dist < grain / 2) { 0 } else { dist }, nbr(lead)]
+            [dist, nbr(lead)]
+        });
+        let bestInNeighborhood = minHood PlusSelf(mux (dist > grain) {
+            /*
+             * You are not carrying a valuable information on leadership if the distance
+             * from the leader you propose is farther than a grain.
+             */
+            [Infinity, lead]
+        } else {
+//	            [mux (dist < grain / 2) { 0 } else { dist }, nbr(lead)]
+            [dist, nbr(lead)]
+        }).get(1);
+    }
+}
+
+/**
+ * Devices compete against one another to become local leaders,
+ * resulting  in  a  random  Voronoi  partition  with  a  characteristic
+ * grain size.
+ *
+ * @param grain  num, partition dimension
+ * @param metric () -> num, estimate distance from the leader
+ * @return       bool, true if the current device is the leader, false otherwise
+ */
+public def S(grain, metric) {
+    breakUsingUids(self.getDeviceUID().getId(), grain, metric)
+}
+
+def minChain(myid) {
+    rep (chain <- [myid]) {
+        let chains = unionHood(nbr([chain]));
+        let neighborhood = unionHood(nbr(myid));
+        chains = chains.filter(self, it -> {
+            // prevent loops containing myself
+            !it.contains(myid)
+            // only a single neighbor 
+            && it.intersection(neighborhood).size() == 1
+        });
+        let candidate = chains.min([]);
+        if (candidate.isEmpty()) { [myid] } else {
+            if (candidate.head() < myid) {
+                candidate.append(myid)
+            } else {
+                [myid]
+            }
+        }
+    }
+}
+
+public def singleLeader(myid) {
+    minChain(myid).head()
+}

@@ -1,0 +1,8 @@
+module d3_voronoi_vienna
+
+//import protelis:coord:sparsechoice2
+import protelis:coord:sparsechoice3
+import protelis:coord:spreading
+
+//S(500, nbrRange)
+S(500)
