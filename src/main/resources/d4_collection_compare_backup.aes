@@ -6,17 +6,17 @@
     "red": {
       "max": 255,
       "min": 0,
-      "val": 255
+      "val": 0
     },
     "blue": {
       "max": 255,
       "min": 0,
-      "val": 200
+      "val": 255
     },
     "green": {
       "max": 255,
       "min": 0,
-      "val": 200
+      "val": 121
     },
     "alpha": {
       "max": 255,
@@ -31,14 +31,14 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 60
+      "val": 8
     },
-    "molFilter": true,
-    "molString": "countdevices",
+    "molFilter": false,
+    "molString": "flow",
     "molPropertyFilter": true,
-    "property": "self.getDeviceUID().getId() \u003d\u003d 0",
+    "property": "",
     "writingPropertyValue": false,
-    "c": "Alpha",
+    "c": "Hue",
     "reverse": false,
     "propoom": {
       "max": 10,
@@ -48,15 +48,15 @@
     "minprop": {
       "max": 10,
       "min": -10,
-      "val": 0
+      "val": -1
     },
     "maxprop": {
       "max": 10,
       "min": -10,
-      "val": 1
+      "val": 2
     },
     "colorCache": {
-      "value": -14136,
+      "value": -16745985,
       "falpha": 0.0
     }
   },
@@ -64,6 +64,67 @@
     "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
     "curIncarnation": "protelis",
     "mode": "FillEllipse",
+    "red": {
+      "max": 255,
+      "min": 0,
+      "val": 255
+    },
+    "blue": {
+      "max": 255,
+      "min": 0,
+      "val": 0
+    },
+    "green": {
+      "max": 255,
+      "min": 0,
+      "val": 255
+    },
+    "alpha": {
+      "max": 255,
+      "min": 0,
+      "val": 255
+    },
+    "scaleFactor": {
+      "max": 100,
+      "min": 0,
+      "val": 50
+    },
+    "size": {
+      "max": 100,
+      "min": 0,
+      "val": 7
+    },
+    "molFilter": false,
+    "molString": "dist",
+    "molPropertyFilter": true,
+    "property": "",
+    "writingPropertyValue": false,
+    "c": "Hue",
+    "reverse": false,
+    "propoom": {
+      "max": 10,
+      "min": -10,
+      "val": 3
+    },
+    "minprop": {
+      "max": 10,
+      "min": -10,
+      "val": 0
+    },
+    "maxprop": {
+      "max": 10,
+      "min": -10,
+      "val": 3
+    },
+    "colorCache": {
+      "value": -256,
+      "falpha": 0.0
+    }
+  },
+  {
+    "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
+    "curIncarnation": "protelis",
+    "mode": "FillRectangle",
     "red": {
       "max": 255,
       "min": 0,
@@ -92,11 +153,11 @@
     "size": {
       "max": 100,
       "min": 0,
-      "val": 10
+      "val": 7
     },
     "molFilter": false,
     "molString": "source",
-    "molPropertyFilter": false,
+    "molPropertyFilter": true,
     "property": "",
     "writingPropertyValue": false,
     "c": "Alpha",
@@ -115,128 +176,6 @@
       "max": 10,
       "min": -10,
       "val": 1
-    },
-    "colorCache": {
-      "value": -16777216,
-      "falpha": 0.0
-    }
-  },
-  {
-    "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
-    "curIncarnation": "protelis",
-    "mode": "FillEllipse",
-    "red": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "blue": {
-      "max": 255,
-      "min": 0,
-      "val": 255
-    },
-    "green": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "alpha": {
-      "max": 255,
-      "min": 0,
-      "val": 255
-    },
-    "scaleFactor": {
-      "max": 100,
-      "min": 0,
-      "val": 50
-    },
-    "size": {
-      "max": 100,
-      "min": 0,
-      "val": 8
-    },
-    "molFilter": true,
-    "molString": "countdevices",
-    "molPropertyFilter": true,
-    "property": "\u003cvalue\u003e.intValue()",
-    "writingPropertyValue": false,
-    "c": "Hue",
-    "reverse": true,
-    "propoom": {
-      "max": 10,
-      "min": -10,
-      "val": 2
-    },
-    "minprop": {
-      "max": 10,
-      "min": -10,
-      "val": 0
-    },
-    "maxprop": {
-      "max": 10,
-      "min": -10,
-      "val": 2
-    },
-    "colorCache": {
-      "value": -16776961,
-      "falpha": 0.0
-    }
-  },
-  {
-    "type": "class it.unibo.alchemist.boundary.gui.effects.DrawShape",
-    "curIncarnation": "protelis",
-    "mode": "FillEllipse",
-    "red": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "blue": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "green": {
-      "max": 255,
-      "min": 0,
-      "val": 0
-    },
-    "alpha": {
-      "max": 255,
-      "min": 0,
-      "val": 255
-    },
-    "scaleFactor": {
-      "max": 100,
-      "min": 0,
-      "val": 35
-    },
-    "size": {
-      "max": 100,
-      "min": 0,
-      "val": 11
-    },
-    "molFilter": true,
-    "molString": "countdevices",
-    "molPropertyFilter": true,
-    "property": "\u003cvalue\u003e.intValue()",
-    "writingPropertyValue": true,
-    "c": "Alpha",
-    "reverse": false,
-    "propoom": {
-      "max": 10,
-      "min": -10,
-      "val": 10
-    },
-    "minprop": {
-      "max": 10,
-      "min": -10,
-      "val": 0
-    },
-    "maxprop": {
-      "max": 10,
-      "min": -10,
-      "val": 10
     },
     "colorCache": {
       "value": -16777216,

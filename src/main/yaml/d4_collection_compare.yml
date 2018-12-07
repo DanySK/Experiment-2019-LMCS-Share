@@ -48,7 +48,7 @@ variables:
     formula: "10"
     
   radius: &radius
-    formula: "100"
+    formula: 50
   deviceNo: &deviceNo
     formula: "$n + 2"         # 998 devices + 2 sources
   n: &n
@@ -101,7 +101,7 @@ pools:
       type: Event
       actions:
         - type: RunProtelisProgram
-          parameters: [isolation, 3]
+          parameters: [countdevices, 3]
     - program: send
   - pool: &vibrate
     - time-distribution: 1
