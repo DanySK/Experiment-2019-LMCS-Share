@@ -46,7 +46,7 @@ network-model:
   parameters: [*radius]
 
 pools:
-  - pool:
+  - pool: # alternate distribution for the target walker, not really working
     - time-distribution: *mrate
       type: Event
       actions:

@@ -1,4 +1,4 @@
-module isolation
+module d1_distance_vienna
 
 import utils
 import algorithm
