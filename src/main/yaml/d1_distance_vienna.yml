@@ -60,7 +60,7 @@ pools:
         parameters: [*rate, *drate, *drate]
       type: Event
       actions:
-        # run the "isolation" field calculus program 
+        # run the field calculus program 
         - type: RunProtelisProgram
           parameters: [d1_distance_vienna, *retain]
         # follow the target with fixed speed (step each turn)

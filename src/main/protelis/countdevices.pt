@@ -1,6 +1,0 @@
-module countdevices
-
-import algorithm
-
-C_MP(G_BIS(self.getDeviceUID().getId() == 0, 1, 1), 1)
-

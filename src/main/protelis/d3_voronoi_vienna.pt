@@ -1,8 +1,8 @@
 module d3_voronoi_vienna
 
-//import protelis:coord:sparsechoice2
-import protelis:coord:sparsechoice3
-import protelis:coord:spreading
+import utils
+import algorithm
 
-//S(500, nbrRange)
-S(500)
+rectangleWalk([48.205, 16.37], [48.211, 16.38], 40);
+
+S(200)

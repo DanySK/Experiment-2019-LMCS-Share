@@ -14,5 +14,5 @@ rectangleWalkRange([0,0], [2000,200], dspace, 1);
 
 // Computes distances (exact and with classic and BIS estimations).
 env.put("classic",	G_STD(source));
-env.put("bis",		G_BIS(source, 150, 50));
+env.put("bis",		G_BIS(source, 150, 75));
 env.put("truedist",	self.distanceTo(sourceId));

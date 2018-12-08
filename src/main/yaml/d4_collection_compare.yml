@@ -1,107 +1,48 @@
 incarnation: protelis
 
-variables:
-    
-  variability: &variability
+variables:    
+  space_variability: &space_variability
     min: 0
     max: 1
-    step: 0.0625
+    step: 0.5
     default: 0.5
+  time_or_noise: &time_or_noise
+    min: 0
+    max: 1
+    step: 1
+    default: 1
   random: &random
     min: 0
     max: 9
     step: 1
     default: 0
-  gradient: &gradient                 # 0. BIS - 1. FLEX - 2. ULT
-    min: 0
-    max: 2
-    step: 1
-    default: 0
-  tolerance: &tolerance
-    min: 3.0
-    max: 4.0
-    step: 0.25
-    default: 3.5
-  alfa: &alfa
-    min: 0.05
-    max: 0.2
-    step: 0.05
-    default: 0.05
-  k: &k
-    min: 2
-    max: 4
-    step: 1
-    default: 3
     
   dspace: &dspace
-    formula: "20 * $variability" # 200x
+    formula: "300*$space_variability"
   dtime: &dtime
-    formula: "$variability / 2"
+    formula: "$time_or_noise/2"
   speed: &speed
-    formula: "3 * $dspace + 0.5" # 0.1x
+    formula: "$dspace/20"
   vibr: &vibr
-    formula: "$variability"      # 10x
-
-  switchTime: &switchTime     # source switch time. If == 0 -> no switch
-    formula: "250"
-  batchFreq: &batchFreq
-    formula: "10"
-    
-  radius: &radius
-    formula: 50
-  deviceNo: &deviceNo
-    formula: "$n + 2"         # 998 devices + 2 sources
-  n: &n
-    formula: "998"
-  rate: &rate
-    formula: "1"
+    formula: "$time_or_noise/5"
     
 seeds:
   scenario: *random
   simulation: *random
- 
-export:
-  - time
-
-  # DEVICE COUNT
-  - molecule: mpwfcc-sum
-    aggregators: [sum]
-  - molecule: mpwf-sum
-    aggregators: [sum]
-  - molecule: mpw-sum
-    aggregators: [sum]
-  - molecule: mp-sum
-    aggregators: [sum]
-  - molecule: sp-sum
-    aggregators: [sum]
-  - molecule: ideal-sum
-    aggregators: [sum]
     
-  # PROGRESS TRACKING
-  - molecule: mpw-max
-    aggregators: [sum]
-  - molecule: mp-max
-    aggregators: [sum]
-  - molecule: sp-max
-    aggregators: [sum]
-  - molecule: ideal-max
-    aggregators: [max]
-    value-filter: onlyfinite
-
-   
 network-model:
   type: EuclideanDistance
-  parameters: [*radius]
+  parameters: [75]
 
 pools:
   - pool: &program
     - time-distribution:
         type: WeibullDistributedWeibullTime
-        parameters: [*rate, *dtime, *dtime]
+        parameters: [1, *dtime, *dtime]
       type: Event
       actions:
         - type: RunProtelisProgram
-          parameters: [countdevices, 3]
+          parameters: [d4_collection_compare, 3]
     - program: send
   - pool: &vibrate
     - time-distribution: 1
@@ -110,7 +51,7 @@ pools:
         - type: BrownianMove
           parameters: [*vibr]
   - pool: &move
-    - time-distribution: 2
+    - time-distribution: 5
       type: Event
       actions:
         - type: MoveToTarget
@@ -118,46 +59,25 @@ pools:
   - pool: &deviceContent
     - molecule: dspace
       concentration: *dspace
-    - molecule: dtime
-      concentration: *dtime
-    - molecule: radius
-      concentration: *radius
-    - molecule: switchTime
-      concentration: *switchTime
-    - molecule: gradient
-      concentration: *gradient
-    - molecule: batchFreq
-      concentration: *batchFreq
-    - molecule: tolerance
-      concentration: *tolerance
-    - molecule: alfa
-      concentration: *alfa
-    - molecule: k
-      concentration: *k
-    - molecule: rate
-      concentration: *rate
 
 displacements:
-
   - in:                                         # source 1
       type: Point
       parameters: [0, 100]
-    contents: *deviceContent
     programs:
       - *program
-      
+    contents: *deviceContent
   - in:                                         # source 2
       type: Point
       parameters: [2000, 100]
-    contents: *deviceContent
     programs:
       - *program
-      
+    contents: *deviceContent
   - in:                                         # devices
       type: Rectangle
-      parameters: [*n, 0, 0, 2000, 200]
-    contents: *deviceContent
+      parameters: [398, 0, 0, 2000, 200]
     programs: 
       - *program
       - *move
       - *vibrate
+    contents: *deviceContent

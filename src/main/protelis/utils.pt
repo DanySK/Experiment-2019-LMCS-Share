@@ -82,12 +82,17 @@ public def min(a, b) {
 // Selects the value for self from a field.
 public def pickHood(field) {
 	let id = self.getDeviceUID().getId();
-	sumHood(mux (id == nbr(id)) {field} else {0})
+	sumHood PlusSelf(mux (id == nbr(id)) {field} else {0})
 }
 
 // Count number of neighbours.
 public def countHood(cond) { 
 	sumHood(mux (cond) { 1 } else { 0 })
+}
+
+// Collapses a field into a tuple.
+public def tupleHood(field) {
+	unionHood PlusSelf([nbr(self.getDeviceUID().getId()),field])
 }
 
 // Fold field with function.
@@ -143,6 +148,11 @@ public def stepCounter(step, max) {
 // How much val changes between consecutive rounds.
 public def roundDiff(val) {
 	rep (x <- [Infinity, Infinity]) {[val-x.get(1), val]}.get(0)
+}
+
+// Smooths values over time.
+public def meanFilter(val, f) {
+	rep (old <- val) {old*(1-f) + val*f}
 }
 
 // How much time since when a value changed by more than err.

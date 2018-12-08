@@ -1,67 +1,22 @@
-module isolation
+module d4_collection_compare
 
-import movement
 import utils
-import G
-import C
+import algorithm
 
-////////////////////////////////////////////////// PREPARATION
+// Compute distance estimations.
+let source = self.getDeviceUID().getId() == 0;
+let distance = G_STD(source);
+env.put("source", source);
 
-rectangleWalk([2000, 200], 1);
+// Determines random targets for devices.
+let dspace = env.get("dspace");
+rectangleWalkRange([0,0], [2000,200], dspace, 1);
 
-let switch   = env.get('switchTime', 0);
-let sourceId = stepCounter(switch, 2);
-let isSource = self.getDeviceUID().getId() == sourceId;
-env.put('source', isSource);
+// Picks semi-random constant value for each device.
+let base = rep(old <- self.getDeviceUID().getId() + 100 - self.distanceTo(0)/20) {old};
+env.put("DEBUG", base);
 
-let algorithm = env.get('gradient', 0);
-let radius    = env.get('radius', 10);
-let gradient  = genericGradient(algorithm, isSource, radius);
-env.put('dist', gradient.get(0));
-env.put('flow', gradient.get(2));
-
-let batchFreq = env.get('batchFreq', 10);
-
-let alfa 	  = env.get('alfa', 0.05);
-let k		  = env.get('k', 3);
-
-////////////////////////////////////////////////// DEVICE COUNTING
-
-let sumValue = 1;
-let percSum  = (value, percent) -> { percent * value };
-let rootSum  = (value, num) -> { value / max(num, 1) };
-let accSum   = (a, b) -> { a + b };
-
-let c_mpw_fcc_sum = C_MPW_FCC    (gradient, accSum, sumValue, 0, percSum, radius, k, alfa);
-let c_mpw_f_sum   = C_MPW_Flow   (gradient, accSum, sumValue, 0, percSum, radius);
-let c_mpw_sum     = C_MP_Weighted(gradient, accSum, sumValue, 0, percSum, radius);
-let c_mp_sum      = C_Multipath  (-gradient.get(0), accSum, sumValue, 0, rootSum);
-let c_std_sum     = C_Singlepath (-gradient.get(0), accSum, sumValue, 0);
-
-report(isSource, 'mpwfcc-sum', c_mpw_fcc_sum, batchFreq);
-report(isSource, 'mpwf-sum'  , c_mpw_f_sum, batchFreq);
-report(isSource, 'mpw-sum'   , c_mpw_sum  , batchFreq);
-report(isSource, 'mp-sum'    , c_mp_sum   , batchFreq);
-report(isSource, 'sp-sum'    , c_std_sum  , batchFreq);
-env.put('ideal-sum', sumValue);
-
-////////////////////////////////////////////////// PROGRESS TRACKING
-
-let tolerance    = env.get('tolerance', 3.5);
-let threshold    = nbr(tolerance / sumHood(nbr(1)));
-let progress     = if (gradient.get(0) < Infinity) {gradient.get(0)} else {0} + (2*switch - self.getCurrentTime());
-let ideal        = self.distanceTo(sourceId) + (2*switch - self.getCurrentTime());
-let rootMax      = (value, num) -> { value };
-let percMax      = (value, percent) -> {
-	mux (percent > threshold) { value } else { -Infinity }
-};
-let accMax       = (a, b) -> { max(a, b) };
-
-let c_mpw_max     = C_MP_Weighted(gradient, accMax, progress, -Infinity, percMax, radius);
-let c_mp_max      = C_Multipath  (-gradient.get(0), accMax, progress, -Infinity, rootMax);
-let c_std_max     = C_Singlepath (-gradient.get(0), accMax, progress, -Infinity);
-
-report(isSource, 'mpw-max'   , c_mpw_max  , batchFreq);
-report(isSource, 'mp-max'    , c_mp_max   , batchFreq);
-report(isSource, 'sp-max'    , c_std_max  , batchFreq);
-env.put('ideal-max', ideal);
+// Computes maximum of time-decaying values (through single-path and multi-path algorithms).
+let val = base - self.getCurrentTime();
+env.put("sp", C_SP(distance, val));
+env.put("mp", C_MP(distance, val));
