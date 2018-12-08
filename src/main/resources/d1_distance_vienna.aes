@@ -95,7 +95,7 @@
       "val": 12
     },
     "molFilter": false,
-    "molString": "rd",
+    "molString": "ad",
     "molPropertyFilter": true,
     "property": "",
     "writingPropertyValue": false,
@@ -104,7 +104,7 @@
     "propoom": {
       "max": 10,
       "min": -10,
-      "val": 7
+      "val": 2
     },
     "minprop": {
       "max": 10,

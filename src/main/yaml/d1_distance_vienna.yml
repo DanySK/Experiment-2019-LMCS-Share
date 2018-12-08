@@ -1,22 +1,16 @@
 incarnation: protelis
 
 variables:
-
   rhol: &rhol     # density level
-    min: 22
+    min: 20
     max: 50
     step: 2
-    default: 30
+    default: 20
   ratel: &ratel   # frequency level
     min: 0
     max: 2
     step: 1
-    default: 1
-  error: &error   # metric error
-    min: 0
-    max: 1.01
-    step: 0.05
-    default: 0.2
+    default: 2
   random: &random # random seed
     min: 0
     max: 4
@@ -27,17 +21,16 @@ variables:
     formula: "$rhol * $rhol"
   rate: &rate               # period length
     formula: "$ratel == 0 ? 0.2 : $ratel == 1 ? 1 : 5"
-
   drate: &drate             # 10% error in period length 
     formula: "0.1 * $rate"
+  mrate: &mrate             # frequency of movement steps
+    formula: "1.0 / $rate"
   retain: &retain           # values are deemed obsolete after 1.5 rounds
     formula: "1.5 * $rate"
   step: &step               # counteract Alchemist's bug on GPS coordinates
     formula: "1.5 * $rate * $rate"
-  speed: &speed             # 1.5 m/s in vienna longitude/latitude
-    formula: "0.000020242"
   radius: &radius           # communication radius
-    formula: "50"
+    formula: "75"
     
 seeds:
   scenario: *random
@@ -53,6 +46,13 @@ network-model:
   parameters: [*radius]
 
 pools:
+  - pool:
+    - time-distribution: *mrate
+      type: Event
+      actions:
+        # follow the target with fixed speed (step each turn)
+        - type: TargetWalker
+          parameters: [target, *step]
   - pool: &program
     - time-distribution:
         # perform rounds according to a Weibull distribution of "rate" mean and deviation "drate" within devices and across devices
@@ -62,18 +62,14 @@ pools:
       actions:
         # run the "isolation" field calculus program 
         - type: RunProtelisProgram
-          parameters: [isolation_old, *retain]
+          parameters: [d1_distance_vienna, *retain]
         # follow the target with fixed speed (step each turn)
         - type: TargetWalker
           parameters: [target, *step]
     - program: send
   - pool: &deviceContent # makes simulation parameters available in the program
-      - molecule: err
-        concentration: *error
       - molecule: num
         concentration: *num
-      - molecule: speed
-        concentration: *speed
       - molecule: rate
         concentration: *rate
 

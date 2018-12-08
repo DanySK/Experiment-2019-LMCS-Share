@@ -50,17 +50,12 @@ public def ifClose(goal, dist) {
     }
 }
 
-// Walk to random targets within a rectangle of given size, changing targets within reach.
-public def rectangleWalk(rectSize, reach) {
-	let target = if (env.has('dspace')) {
-		let dspace = env.get('dspace');
-		if (dspace == 0) {
-			cropRectangle(self.getCoordinates(), [0,0], rectSize)
-		} else {
-			ifClose(() -> {cropRectangle(self.getCoordinates()+randVector(dspace), [0,0], rectSize)}, reach)
-		}
-	} else {randRect([0,0], rectSize)};
-	env.put('target', target)
+// Walk to random targets within a rectangle of given size (and within a range if given), changing targets within reach.
+public def rectangleWalkRange(lo, hi, dspace, reach) {
+	env.put('target', ifClose(() -> {cropRectangle(self.getCoordinates()+randVector(dspace), lo, hi)}, reach))
+}
+public def rectangleWalk(lo, hi, reach) {
+	env.put('target', ifClose(() -> {randRect(lo, hi)}, reach))
 }
 
 // MATHEMATICAL FUNCTIONS
