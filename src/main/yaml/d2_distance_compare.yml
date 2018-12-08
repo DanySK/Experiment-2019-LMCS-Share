@@ -16,6 +16,7 @@ variables:
     max: 9
     step: 1
     default: 0
+ 
   dspace: &dspace
     formula: "300*$space_variability"
   dtime: &dtime
@@ -60,22 +61,23 @@ pools:
       concentration: *dspace
 
 displacements:
-  - in:
+  - in:                                         # source 1
       type: Point
       parameters: [0, 100]
     programs:
       - *program
     contents: *deviceContent
-  - in:
+  - in:                                         # source 2
       type: Point
       parameters: [2000, 100]
     programs:
       - *program
     contents: *deviceContent
-  - in:
+  - in:                                         # devices
       type: Rectangle
       parameters: [398, 0, 0, 2000, 200]
     programs: 
       - *program
       - *move
+      - *vibrate
     contents: *deviceContent

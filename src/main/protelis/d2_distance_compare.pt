@@ -1,6 +1,5 @@
 module d2_distance_compare
 
-import java.lang.Math.*
 import utils
 import algorithm
 
