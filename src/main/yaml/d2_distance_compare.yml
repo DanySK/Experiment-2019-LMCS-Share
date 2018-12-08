@@ -17,13 +17,13 @@ variables:
     step: 1
     default: 0
   dspace: &dspace
-    formula: "2*$space_variability + ($space_variability==1 ? 1 : 0)"
+    formula: "300*$space_variability"
   dtime: &dtime
     formula: "$time_or_noise/2"
   speed: &speed
-    formula: "$dspace/3"
+    formula: "$dspace/10"
   vibr: &vibr
-    formula: "$time_or_noise/10"
+    formula: "$time_or_noise*5"
 
 seeds:
   scenario: *random
@@ -31,7 +31,7 @@ seeds:
 
 network-model:
   type: EuclideanDistance
-  parameters: [1]
+  parameters: [75]
   
 pools:
   - pool: &program
@@ -50,42 +50,32 @@ pools:
         - type: BrownianMove
           parameters: [*vibr]
   - pool: &move
-    - time-distribution: 10
+    - time-distribution: 5
       type: Event
       actions:
         - type: MoveToTarget
           parameters: [target, *speed]
+  - pool: &deviceContent
+    - molecule: dspace
+      concentration: *dspace
 
 displacements:
   - in:
       type: Point
-      parameters: [0, 1]
-    contents:
-      - molecule: dspace
-        concentration: *dspace
-      - molecule: dtime
-        concentration: *dtime
+      parameters: [0, 100]
     programs:
       - *program
+    contents: *deviceContent
   - in:
       type: Point
-      parameters: [50, 1]
-    contents:
-      - molecule: dspace
-        concentration: *dspace
-      - molecule: dtime
-        concentration: *dtime
+      parameters: [2000, 100]
     programs:
       - *program
+    contents: *deviceContent
   - in:
       type: Rectangle
-      parameters: [998, 0, 0, 50, 2]
-    contents:
-      - molecule: dspace
-        concentration: *dspace
-      - molecule: dtime
-        concentration: *dtime
+      parameters: [398, 0, 0, 2000, 200]
     programs: 
       - *program
       - *move
-      - *vibrate
+    contents: *deviceContent

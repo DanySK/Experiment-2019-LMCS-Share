@@ -4,23 +4,16 @@ import java.lang.Math.*
 import utils
 import algorithm
 
-
-def trueDist() {
-    self.distanceTo(if (self.getCurrentTime() < 300) {0} else {1})
-}
-
-
-let batchFreq = 10;
-let id = self.getDeviceUID().getId();
-let sourceId = if (self.getCurrentTime() % 300 < 150 ) { 0 } else { 1 };
-let source = id == sourceId;
-let dspace = env.get("dspace");
-let dtime = env.get("dtime");
-let v = if (dtime==0) {0.461} else {0.889} + dspace/6;
-
-env.put("truedist", trueDist());
-env.put("round", 	rep (x<-0) {x+1});
-env.put("target", ifClose(() -> {cropRectangle(self.getCoordinates()+randVector(dspace), [0,0], [50,2])}, 0.05));
+// The source of distance estimations switches between devices 0 and 1 every minute.
+let sourceId = if ((self.getCurrentTime()+30) % 120 < 60 ) { 0 } else { 1 };
+let source = self.getDeviceUID().getId() == sourceId;
 env.put("source", source);
+
+// Determines random targets for devices.
+let dspace = env.get("dspace");
+rectangleWalkRange([0,0], [2000,200], dspace, 1);
+
+// Computes distances (exact and with classic and BIS estimations).
 env.put("classic",	G_STD(source));
-env.put("bis", 	G_BIS(source, 1, 1));
+env.put("bis",		G_BIS(source, 150, 50));
+env.put("truedist",	self.distanceTo(sourceId));
