@@ -1,6 +1,7 @@
 module utils
 
 import java.lang.Math.*
+import it.unibo.alchemist.custom.CoordinationUtil.*
 
 // GEOMETRICAL FUNCTIONS
 /////////////////////////
@@ -45,7 +46,8 @@ public def randRect(lo, hi) {
 // the distance from the current goal drops below "mindist".
 public def ifClose(goal, dist) {
     rep (x <- goal.apply()) {
-        if (self.distanceTo(x) <= dist) 
+//        if (self.distanceTo(x) <= dist) 
+        if (computeDistance(self, x) <= dist)
         { goal.apply() } else { x }
     }
 }
