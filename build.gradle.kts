@@ -15,10 +15,11 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
     maven("https://dl.bintray.com/alchemist-simulator/Alchemist/")
+    maven("https://dl.bintray.com/protelis/Protelis/")
 }
 
 dependencies {
-    api("it.unibo.alchemist:alchemist:8.0.0-beta+006.b9d38")
+    api("it.unibo.alchemist:alchemist:8.0.0-beta+008.6ee70")
     implementation(kotlin("stdlib-jdk8"))
 }
 
