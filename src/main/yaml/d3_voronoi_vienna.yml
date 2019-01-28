@@ -39,7 +39,7 @@ seeds:
 # Loads the Vienna city map and sets the communication radius.
 environment:
   type: OSMEnvironment
-  parameters: ["/vcm.pbf", false]
+  parameters: ["vcm.pbf", false]
    
 network-model:
   type: EuclideanDistance
