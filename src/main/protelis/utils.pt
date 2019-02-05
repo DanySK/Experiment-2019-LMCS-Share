@@ -18,15 +18,15 @@ public def powNorm(v, p) {
 
 // Crop a coordinate to fit into a rectangle.
 public def cropRectangle(x, low, hi) {
-    [min(max(x.get(0), low.get(0)), hi.get(0)), 
+    [min(max(x.get(0), low.get(0)), hi.get(0)),
      min(max(x.get(1), low.get(1)), hi.get(1))]
 }
 
-// Project x to fit within circle of center c and radius r. 
+// Project x to fit within circle of center c and radius r.
 public def cropCircle(x, c, r) {
-	let d = x - c;
+    let d = x - c;
     if (pow(d.get(0), 2) + pow(d.get(1), 2) < pow(r,2)) { x } else {
-		c + (d / norm(d) * r)
+        c + (d / norm(d) * r)
     }
 }
 
@@ -39,14 +39,14 @@ public def randVector(r) {
 // Random vector within the rectangle bounded by points "lo" and "hi".
 public def randRect(lo, hi) {
     [lo.get(0) + (hi.get(0)-lo.get(0))*self.nextRandomDouble(),
-    	 lo.get(1) + (hi.get(1)-lo.get(1))*self.nextRandomDouble()]
+         lo.get(1) + (hi.get(1)-lo.get(1))*self.nextRandomDouble()]
 }
 
 // Returns a goal by applying function "goal", and regenerates it whenever
 // the distance from the current goal drops below "mindist".
 public def ifClose(goal, dist) {
     rep (x <- goal.apply()) {
-//        if (self.distanceTo(x) <= dist) 
+//        if (self.distanceTo(x) <= dist)
         if (computeDistance(self, x) <= dist)
         { goal.apply() } else { x }
     }
@@ -54,10 +54,10 @@ public def ifClose(goal, dist) {
 
 // Walk to random targets within a rectangle of given size (and within a range if given), changing targets within reach.
 public def rectangleWalkRange(lo, hi, dspace, reach) {
-	env.put('target', ifClose(() -> {cropRectangle(self.getCoordinates()+randVector(dspace), lo, hi)}, reach))
+    env.put('target', ifClose(() -> {cropRectangle(self.getCoordinates()+randVector(dspace), lo, hi)}, reach))
 }
 public def rectangleWalk(lo, hi, reach) {
-	env.put('target', ifClose(() -> {randRect(lo, hi)}, reach))
+    env.put('target', ifClose(() -> {randRect(lo, hi)}, reach))
 }
 
 // MATHEMATICAL FUNCTIONS
@@ -65,7 +65,7 @@ public def rectangleWalk(lo, hi, reach) {
 
 // Identity function.
 public def identity(v) {
-	v
+    v
 }
 
 // Maximum of two comparable values.
@@ -74,37 +74,31 @@ public def max(a, b) {
 }
 
 // Minimum of two comparable values.
-public def min(a, b) {	
+public def min(a, b) {
     mux (a.compareTo(b) < 0 ) { a } else { b }
 }
 
 // NEIGHBOURHOOD FUNCTIONS
 //////////////////////////
 
-// Selects the value for self from a field.
-public def pickHood(field) {
-	let id = self.getDeviceUID().getId();
-	sumHood PlusSelf(mux (id == nbr(id)) {field} else {0})
-}
-
 // Count number of neighbours.
-public def countHood(cond) { 
-	sumHood(mux (cond) { 1 } else { 0 })
+public def countHood(cond) {
+    sumHood(mux (cond) { 1 } else { 0 })
 }
 
 // Collapses a field into a tuple.
 public def tupleHood(field) {
-	unionHood PlusSelf([nbr(self.getDeviceUID().getId()),field])
+    unionHood PlusSelf([nbr(self.getDeviceUID().getId()),field])
 }
 
 // Fold field with function.
 public def foldHood(func, field, default) {
-	hood((a, b) -> { func.apply(a, b) }, default, field)
+    hood((a, b) -> { func.apply(a, b) }, default, field)
 }
 
 // Minimum among neighbours' values and a local value.
-public def minHoodLoc(field, local) {	
-	min(minHood(field), local);
+public def minHoodLoc(field, local) {
+    min(minHood(field), local);
 }
 
 // LIST FUNCTIONS
@@ -130,31 +124,31 @@ public def dup(t) {
 
 // True if event happened not more than timeout time ago.
 public def recently(event, timeout) {
-	if (rep (hasHappenedBefore <- false) { hasHappenedBefore || event }) {
-	    if (event) { true } else {
-	        rep (v <- timeout) {v - self.getDeltaTime()} > 0
-	    }
-	} else { false }
+    if (rep (hasHappenedBefore <- false) { hasHappenedBefore || event }) {
+        if (event) { true } else {
+            rep (v <- timeout) {v - self.getDeltaTime()} > 0
+        }
+    } else { false }
 }
 
 // True once every frequency rounds.
-public def clockCounter(frequency) {    
+public def clockCounter(frequency) {
     if (rep (x<-0) {x+1} % frequency == 0) {true} else {false}
 }
 
 // Count up to max, increasing every step time.
 public def stepCounter(step, max) {
-	if (step == 0) {0} else {floor(self.getCurrentTime()/step)} % max
+    if (step == 0) {0} else {floor(self.getCurrentTime()/step)} % max
 }
 
 // How much val changes between consecutive rounds.
 public def roundDiff(val) {
-	rep (x <- [Infinity, Infinity]) {[val-x.get(1), val]}.get(0)
+    rep (x <- [Infinity, Infinity]) {[val-x.get(1), val]}.get(0)
 }
 
 // Smooths values over time.
 public def meanFilter(val, f) {
-	rep (old <- val) {old*(1-f) + val*f}
+    rep (old <- val) {old*(1-f) + val*f}
 }
 
 // How much time since when a value changed by more than err.
