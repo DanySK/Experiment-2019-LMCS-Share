@@ -73,8 +73,7 @@ public def C_MP(dist, value) {
  */
 public def S(grain) {
     let id = self.getDeviceUID().getId();
-    share (old <- id) {
-        let lead = localHood(old);
+    rep (lead <- id) {
         let d = G_STD(id == lead);
         mux (d > grain) {
             id

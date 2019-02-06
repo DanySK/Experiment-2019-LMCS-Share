@@ -31,7 +31,7 @@ seeds:
   simulation: *random
     
 network-model:
-  type: EuclideanDistance
+  type: ConnectWithinDistance
   parameters: [75]
 
 pools:
