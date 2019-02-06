@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    api("it.unibo.alchemist:alchemist:8.0.0-beta+008.6ee70")
+    api("it.unibo.alchemist:alchemist:8.0.0-beta+008.ed0ca")
     implementation(kotlin("stdlib-jdk8"))
 }
 
