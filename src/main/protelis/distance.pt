@@ -1,0 +1,59 @@
+module distance
+
+import java.lang.Double.*
+import it.unibo.alchemist.custom.CoordinationUtil.*
+
+/**
+ * GPS distance with neighbours assuming rep+nbr communication.
+ */
+def repRange() {
+	let pos = self.getCoordinates();
+	let prev = rep (old <- [pos, NaN]) {
+		[pos, old.get(0)]
+	};
+	computeDistance(self, nbr(prev))
+}
+
+/**
+ * Time lag with neighbours assuming rep+nbr communication.
+ */
+def repLag() {
+	self.nbrLag() + nbr(self.getDeltaTime())
+}
+
+/**
+ * Bounded Information Speed Distance Estimation, using rep+nbr.
+ *
+ * @param source  whether the device is a source
+ * @param speed   average communication speed
+ * @param radius  communication radius
+ * @return        estimated distance in space and time
+ */
+public def repDistance(source, speed, radius) {
+    rep (old <- [Infinity, Infinity]) {
+        mux (source) {[0,0]} else {
+            let dx = nbr(old.get(0)) + repRange();
+            let dt = nbr(old.get(1)) + repLag();
+            minHood([max(dx, dt*speed-radius), dt])
+        }
+    }
+}
+
+
+/**
+ * Bounded Information Speed Distance Estimation, using share.
+ *
+ * @param source  whether the device is a source
+ * @param speed   average communication speed
+ * @param radius  communication radius
+ * @return        estimated distance in space and time
+ */
+public def shareDistance(source, speed, radius) {
+    share (old <- [Infinity, Infinity]) {
+        mux (source) {[0,0]} else {
+            let dx = old.get(0) + self.nbrRange();
+            let dt = old.get(1) + self.nbrLag();
+            minHood([max(dx, dt*speed-radius), dt])
+        }
+    }
+}

@@ -1,48 +1,49 @@
 incarnation: protelis
 
-variables:    
-  space_variability: &space_variability
+variables:
+  variability: &variability
     min: 0
     max: 1
     step: 0.5
     default: 0.5
-  time_or_noise: &time_or_noise
-    min: 0
-    max: 1
-    step: 1
-    default: 1
   random: &random
     min: 0
     max: 9
     step: 1
     default: 0
-    
+ 
+  rate: &rate               # period length
+    formula: "1"
   dspace: &dspace
-    formula: "300*$space_variability"
+    formula: "300*$variability"
   dtime: &dtime
-    formula: "$time_or_noise/2"
+    formula: "$rate * $variability/2"
   speed: &speed
-    formula: "$dspace/20"
+    formula: "$dspace/10"
   vibr: &vibr
-    formula: "$time_or_noise/5"
-    
+    formula: "$variability*5"
+  radius: &radius           # communication radius
+    formula: "75"
+  batchFreq: &batchFreq
+    formula: "10"
+
 seeds:
   scenario: *random
   simulation: *random
-    
+
 network-model:
   type: ConnectWithinDistance
-  parameters: [75]
-
+  parameters: [*radius]
+  
 pools:
   - pool: &program
     - time-distribution:
         type: WeibullDistributedWeibullTime
-        parameters: [1, *dtime, *dtime]
+        parameters: [*rate, *dtime, *dtime]
       type: Event
       actions:
         - type: RunProtelisProgram
-          parameters: [d4_collection_compare, 3]
+          parameters: [s1_corridor, 3]
     - program: send
   - pool: &vibrate
     - time-distribution: 1
@@ -59,6 +60,12 @@ pools:
   - pool: &deviceContent
     - molecule: dspace
       concentration: *dspace
+    - molecule: rate
+      concentration: *rate
+    - molecule: radius
+      concentration: *radius
+    - molecule: batchFreq
+      concentration: *batchFreq
 
 displacements:
   - in:                                         # source 1
@@ -75,7 +82,7 @@ displacements:
     contents: *deviceContent
   - in:                                         # devices
       type: Rectangle
-      parameters: [398, 0, 0, 2000, 200]
+      parameters: [498, 0, 0, 2000, 200]
     programs: 
       - *program
       - *move

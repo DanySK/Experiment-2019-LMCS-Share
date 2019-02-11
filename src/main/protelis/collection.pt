@@ -1,0 +1,29 @@
+module collection
+
+/**
+ * Multi-Path Max-Collection, using rep+nbr.
+ *
+ * @param dist   distance from the source
+ * @param value  input value
+ * @return       estimated maximum value
+ */
+public def repCollection(dist, value) {
+    rep (old <- value) {
+        let nbrValues = mux (nbr(dist) > dist) { nbr(old) } else { value };
+        maxHood PlusSelf(nbrValues)
+    }
+}
+
+/**
+ * Multi-Path Max-Collection, using share.
+ *
+ * @param dist   distance from the source
+ * @param value  input value
+ * @return       estimated maximum value
+ */
+public def shareCollection(dist, value) {
+    share (old <- value) {
+        let nbrValues = mux (nbr(dist) > dist) { old } else { value };
+        maxHood PlusSelf(nbrValues)
+    }
+}

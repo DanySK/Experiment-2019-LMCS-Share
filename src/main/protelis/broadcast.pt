@@ -1,0 +1,29 @@
+module broadcast
+
+/**
+ * Broadcast value from a source, using rep+nbr.
+ *
+ * @param dist   distance from the source
+ * @param value  input value
+ * @return       broadcast value
+ */
+public def repBroadcast(dist, value) {
+    rep (old <- value) {
+    	let nbrValues = mux (dist == 0) {value} else {nbr(old)};
+    	minHood PlusSelf([nbr(dist), nbrValues]).get(1)
+    }
+}
+
+/**
+ * Broadcast value from a source, using share.
+ *
+ * @param dist   distance from the source
+ * @param value  input value
+ * @return       broadcast value
+ */
+public def shareBroadcast(dist, value) {
+    share (old <- value) {
+    	let nbrValues = mux (dist == 0) {value} else {old};
+    	minHood PlusSelf([nbr(dist), nbrValues]).get(1)
+    }
+}

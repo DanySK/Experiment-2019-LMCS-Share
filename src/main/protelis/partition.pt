@@ -1,0 +1,27 @@
+module partition
+
+/**
+ * Devices compete against one another to become local leaders,
+ * resulting in a random Voronoi partition with a characteristic
+ * grain size.
+ *
+ * @param grain      partition maximum radius
+ * @param algorithm  distance algorithm used
+ * @return           leader UID
+ */
+public def partitioning(grain, algorithm) {
+    let id = self.getDeviceUID().getId();
+    rep (lead <- id) {
+        let d = algorithm.apply(id == lead);
+        mux (d > grain) {
+            id
+        } else {
+            let dist = self.nbrRange() + nbr(d);
+            minHood PlusSelf(mux (dist > grain || dist == 0) {
+                [Infinity, lead] // leader farther than grain is unacceptable
+            } else {
+                [mux (dist < grain / 2) { 0 } else { dist }, nbr(lead)]
+            }).get(1)
+        }
+    }
+}

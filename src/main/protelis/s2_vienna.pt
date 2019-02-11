@@ -1,0 +1,27 @@
+module s2_vienna
+
+import java.lang.Double.*
+import utils
+import distance
+import partition
+
+// Determines random targets for devices.
+rectangleWalk([48.205, 16.37], [48.211, 16.38], 40);
+
+// Get simulation parameters.
+let rate 		= env.get("rate");
+let radius 		= env.get("radius");
+let batchFreq 	= env.get("batchFreq");
+let rV = 0.4 * radius / rate;
+let sV = 2.0 * radius / rate;
+
+// Compute Voronoi partitioning and true distances from leaders.
+let rL = partitioning(200, (source) -> {  repDistance(source, rV, radius)});
+let sL = partitioning(200, (source) -> {shareDistance(source, sV, radius)});
+let rD = self.distanceTo(rL);
+let sD = self.distanceTo(sL);
+
+env.put("distance-rep",   meanCounter(max(rD - 200,0), batchFreq));
+env.put("distance-share", meanCounter(max(sD - 200,0), batchFreq));
+env.put("leader-rep",   rL);
+env.put("leader-share", sL);

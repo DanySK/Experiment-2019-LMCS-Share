@@ -1,8 +1,0 @@
-module d3_voronoi_vienna
-
-import utils
-import algorithm
-
-rectangleWalk([48.205, 16.37], [48.211, 16.38], 40);
-
-S(200)
