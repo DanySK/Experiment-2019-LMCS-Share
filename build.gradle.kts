@@ -48,7 +48,7 @@ fun makeTest(
     time: Double = Double.POSITIVE_INFINITY,
     vars: Set<String> = setOf(),
     maxHeap: Long? = null,
-    taskSize: Int = 1024,
+    taskSize: Int = 512,
     threads: Int? = null,
     debug: Boolean = false
 ) {
@@ -94,5 +94,7 @@ fun makeTest(
         }
     }
 }
+
+makeTest("s1_corridor", name = "corridor", sampling = 2.0, time = 500, vars = setOf("seed"))
 
 defaultTasks("runTests")

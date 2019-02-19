@@ -11,7 +11,7 @@ def repRange() {
 	let prev = rep (old <- [pos, NaN]) {
 		[pos, old.get(0)]
 	};
-	computeDistance(self, nbr(prev))
+	computeDistance(self, nbr(prev.get(1)))
 }
 
 /**
