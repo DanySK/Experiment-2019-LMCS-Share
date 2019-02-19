@@ -1,4 +1,4 @@
-import org.gradle.internal.impldep.org.apache.commons.io.output.ByteArrayOutputStream
+import java.io.ByteArrayOutputStream
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.codehaus.groovy.ast.tools.GeneralUtils.args
