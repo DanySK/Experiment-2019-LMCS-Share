@@ -95,6 +95,6 @@ fun makeTest(
     }
 }
 
-makeTest("s1_corridor", name = "corridor", sampling = 2.0, time = 500, vars = setOf("seed"))
+makeTest("s1_corridor", name = "corridor", sampling = 2.0, time = 500.0, vars = setOf("seed"))
 
 defaultTasks("runTests")
