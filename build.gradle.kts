@@ -19,7 +19,12 @@ repositories {
 }
 
 dependencies {
-    api("it.unibo.alchemist:alchemist:8.0.0-beta+0sr.822ad")
+    val alchemistVersion = "8.0.0-beta+0t3.1fcab"
+    api("it.unibo.alchemist:alchemist:$alchemistVersion")
+    implementation("it.unibo.alchemist:alchemist-implementationbase:$alchemistVersion")
+    implementation("it.unibo.alchemist:alchemist-maps:$alchemistVersion")
+    implementation("it.unibo.alchemist:alchemist-incarnation-protelis:$alchemistVersion")
+    implementation("org.apache.commons:commons-math3:3.6.1")
     implementation(kotlin("stdlib-jdk8"))
 }
 
