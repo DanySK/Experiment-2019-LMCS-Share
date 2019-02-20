@@ -91,6 +91,8 @@ fun makeTest(
         )
         if (vars.isNotEmpty()) {
             args("-b", "-var", *vars.toTypedArray())
+        } else {
+            args("-g", "effects/${file}.aes")
         }
     }
     tasks {
@@ -101,5 +103,7 @@ fun makeTest(
 }
 
 makeTest("s1_corridor", name = "corridor", sampling = 2.0, time = 500.0, vars = setOf("seed"))
+makeTest("s2_vienna", name = "vienna", sampling = 2.0, time = 300.0, vars = setOf("seed"))
+makeTest("s2_vienna", name = "vienna-gui", sampling = 2.0)
 
 defaultTasks("runTests")
