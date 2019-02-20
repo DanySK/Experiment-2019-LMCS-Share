@@ -7,11 +7,11 @@ import it.unibo.alchemist.custom.CoordinationUtil.*
  * GPS distance with neighbours assuming rep+nbr communication.
  */
 def repRange() {
-	let pos = self.getCoordinates();
+	let pos = self.getDevicePosition();
 	let prev = rep (old <- [pos, NaN]) {
 		[pos, old.get(0)]
 	};
-	computeDistance(self, nbr(prev.get(1)))
+	pos.getDistanceTo(prev.get(1))
 }
 
 /**
