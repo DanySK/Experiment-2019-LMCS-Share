@@ -12,16 +12,87 @@ module partition
 public def partitioning(grain, algorithm) {
     let id = self.getDeviceUID().getId();
     rep (lead <- id) {
-        let d = algorithm.apply(id == lead);
+        let d = algorithm.apply(id == lead).get(0);
+        env.put("algoresult", d);
         mux (d > grain) {
             id
         } else {
             let dist = self.nbrRange() + nbr(d);
-            minHood PlusSelf(mux (dist > grain || dist == 0) {
-                [Infinity, lead] // leader farther than grain is unacceptable
-            } else {
-                [mux (dist < grain / 2) { 0 } else { dist }, nbr(lead)]
-            }).get(1)
+            env.put("distance", dist);
+            minHood PlusSelf(
+                mux (dist > grain || dist == 0) {
+                    [Infinity, lead] // leader farther than grain is unacceptable
+                } else {
+                    [mux (dist < grain / 2) { 0 } else { dist }, nbr(lead)]
+                }).get(1)
         }
     }
+}
+
+
+/**
+ * Devices compete against one another to become local leaders,
+ * resulting in a random Voronoi partition with a characteristic
+ * grain size.
+ *
+ * @param grain      partition maximum radius
+ * @param algorithm  distance algorithm used, (Boolean) => Tuple2<Number, _>
+ * @return           leader UID
+ */
+public def partitioning2(grain, metric) {
+    S(grain, metric)
+}
+
+def default() {
+    Infinity
+}
+
+def breakUsingUids(uid, grain, metric) {
+    rep (lead <- uid) {
+        distanceCompetition(metric.apply(uid == lead).get(0), lead, uid, grain)
+    }
+}
+
+def distanceCompetition(d, lead, uid, grain) {
+//    env.put("d", d);
+//    env.put("lead", lead);
+//    env.put("uid", uid);
+//    env.put("grain", grain);
+    mux (d > grain) {
+        uid
+    } else {
+        let nbrdistance = nbr(d) + self.nbrRange();
+//        env.putField("nbrdistance", nbrdistance);
+        let thr = 0.2 * grain;
+//        env.put("thr", thr);
+        let nbrlead = nbr(lead);
+//        env.putField("nbrlead", nbrlead);
+        let leadingField = [mux (nbrdistance < thr) { 0 } else { nbrdistance }, nbrlead];
+//        mux (nbrdistance >= thr) {
+//            default()
+//        } else {
+//            nbr(lead)
+//        };
+//        env.putField("leadingField", leadingField);
+        minHood PlusSelf(leadingField).get(1)
+    }
+}
+
+def randomUid() {
+    rep (v <- self.getDeviceUID().getId()) {
+        v
+    }
+}
+
+/**
+ * Devices compete against one another to become local leaders,
+ * resulting  in  a  random  Voronoi  partition  with  a  characteristic
+ * grain size.
+ *
+ * @param grain  num, partition dimension
+ * @param metric () -> num, estimate distance from the leader
+ * @return       bool, true if the current device is the leader, false otherwise
+ */
+public def S(grain, metric) {
+    breakUsingUids(randomUid(), grain, metric)
 }

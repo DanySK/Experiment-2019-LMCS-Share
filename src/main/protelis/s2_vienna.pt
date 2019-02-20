@@ -16,10 +16,10 @@ let rV = 0.4 * radius / rate;
 let sV = 2.0 * radius / rate;
 
 // Compute Voronoi partitioning and true distances from leaders.
-let rL = partitioning(200, (source) -> {  repDistance(source, rV, radius)});
-let sL = partitioning(200, (source) -> {shareDistance(source, sV, radius)});
-let rD = self.distanceTo(rL);
-let sD = self.distanceTo(sL);
+let rL = partitioning2(200, (source) -> {  repDistance(source, rV, radius)});
+let sL = partitioning2(200, (source) -> {shareDistance(source, sV, radius)});
+let rD = if (sL < 100000) { self.distanceTo(rL) } else { NaN };
+let sD = if (sL < 100000) { self.distanceTo(sL) } else { NaN };
 
 env.put("distance-rep",   meanCounter(max(rD - 200,0), batchFreq));
 env.put("distance-share", meanCounter(max(sD - 200,0), batchFreq));
