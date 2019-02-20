@@ -27,6 +27,21 @@ variables:
   batchFreq: &batchFreq
     formula: "10"
 
+export:
+ - time
+ - molecule: distance-rep
+   aggregators: [mean]
+   value-filter: onlyfinite
+ - molecule: leader-rep
+   aggregators: [countdistinct]
+   value-filter: onlyfinite
+ - molecule: distance-share
+   aggregators: [mean]
+   value-filter: onlyfinite
+ - molecule: leader-share
+   aggregators: [countdistinct]
+   value-filter: onlyfinite
+
 seeds:
   scenario: *random
   simulation: *random
