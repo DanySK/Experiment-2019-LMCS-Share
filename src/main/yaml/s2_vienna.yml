@@ -25,7 +25,7 @@ variables:
   radius: &radius           # communication radius
     formula: "75"
   batchFreq: &batchFreq
-    formula: "10"
+    formula: "5"
 
 export:
  - time

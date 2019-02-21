@@ -24,7 +24,7 @@ variables:
   radius: &radius           # communication radius
     formula: "75"
   batchFreq: &batchFreq
-    formula: "10"
+    formula: "5"
 
 export:
  - time
@@ -156,7 +156,7 @@ displacements:
     contents: *deviceContent
   - in:                                         # devices
       type: Rectangle
-      parameters: [498, 0, 0, 2000, 200]
+      parameters: [998, 0, 0, 2000, 200]
     programs: 
       - *program
       - *move

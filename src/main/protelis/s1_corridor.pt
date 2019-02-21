@@ -7,18 +7,13 @@ import collection
 import broadcast
 
 // Reports the error of a spatio-temporal value. 
-def report(export, frequency, name, trueval, algoval) {
-	if (export) {
-		env.put("derr-" + name, meanCounter(abs(trueval.get(0) - algoval.get(0)), frequency));
-		env.put("terr-" + name, meanCounter(abs(trueval.get(1) - algoval.get(1)), frequency));
-	} else {
-		env.put("derr-" + name, 0);
-		env.put("terr-" + name, 0);
-	}
+def report(frequency, name, trueval, algoval) {
+	env.put("derr-" + name, meanCounter(abs(trueval.get(0) - algoval.get(0)), frequency));
+	env.put("terr-" + name, meanCounter(abs(trueval.get(1) - algoval.get(1)), frequency));
 }
 
 // The source of distance estimations switches between devices 0 and 1 every 2 minutes.
-let sourceId = if ((self.getCurrentTime()+60) % 240 < 120 ) { 0 } else { 1 };
+let sourceId = if ((self.getCurrentTime()+40) % 240 < 120 ) { 0 } else { 1 };
 let source = self.getDeviceUID().getId() == sourceId;
 env.put("source", source);
 
@@ -43,34 +38,34 @@ let tT = self.getCurrentTime();
 let rDT = repDistance(source, rV, radius);
 let rD = rDT.get(0);
 let rT = tT - rDT.get(1);
-report(true, batchFreq, "single-distance-rep", [tD, tT], [rD, rT]);
-report(true, batchFreq,  "stack-distance-rep", [tD, tT], [rD, rT]);
+report(batchFreq, "single-distance-rep", [tD, tT], [rD, rT]);
+report(batchFreq,  "stack-distance-rep", [tD, tT], [rD, rT]);
 // share-based
 let sDT = shareDistance(source, sV, radius);
 let sD = sDT.get(0);
 let sT = tT - sDT.get(1);
-report(true, batchFreq, "single-distance-share", [tD, tT], [sD, sT]);
-report(true, batchFreq,  "stack-distance-share", [tD, tT], [sD, sT]);
+report(batchFreq, "single-distance-share", [tD, tT], [sD, sT]);
+report(batchFreq,  "stack-distance-share", [tD, tT], [sD, sT]);
 
 
 // 2) Computes maximum (d,t) in the source, exact and estimations (based on exact or estimated values).
-let tM  = [2000, tT];
+let tM  = [2010, tT];
 let rtM =   repCollection(tD, [tD, tT]);
 let stM = shareCollection(tD, [tD, tT]);
 let rM  =   repCollection(rD, [rD, rT]);
 let sM  = shareCollection(sD, [sD, sT]);
-report(source, batchFreq, "single-collection-rep",   tM, rtM);
-report(source, batchFreq,  "stack-collection-rep",   tM, rM);
-report(source, batchFreq, "single-collection-share", tM, stM);
-report(source, batchFreq,  "stack-collection-share", tM, sM);
+report(batchFreq, "single-collection-rep",   tM, rtM);
+report(batchFreq,  "stack-collection-rep",   tM, rM);
+report(batchFreq, "single-collection-share", tM, stM);
+report(batchFreq,  "stack-collection-share", tM, sM);
 
 
-// 3) Broadcast maximum (d,t) everywhere, based on exact or estimated values.
+//// 3) Broadcast maximum (d,t) everywhere, based on exact or estimated values.
 let rtB =   repBroadcast(tD, tM);
 let stB = shareBroadcast(tD, tM);
 let rB  =   repBroadcast(rD, rM);
 let sB  = shareBroadcast(sD, sM);
-report(true, batchFreq, "single-broadcast-rep",   tM, rtB);
-report(true, batchFreq,  "stack-broadcast-rep",   tM, rB);
-report(true, batchFreq, "single-broadcast-share", tM, stB);
-report(true, batchFreq,  "stack-broadcast-share", tM, sB);
+report(batchFreq, "single-broadcast-rep",   tM, rtB);
+report(batchFreq,  "stack-broadcast-rep",   tM, rB);
+report(batchFreq, "single-broadcast-share", tM, stB);
+report(batchFreq,  "stack-broadcast-share", tM, sB);

@@ -3,6 +3,33 @@ module utils
 import java.lang.Math.*
 import it.unibo.alchemist.custom.CoordinationUtil.*
 
+// METRICS
+//////////
+
+// Exact distance with neighbours assuming rep+nbr communication.
+public def repRange() {
+	let pos = self.getDevicePosition();
+	let prev = rep (old <- [pos, NaN]) {
+		[pos, old.get(0)]
+	};
+	pos.getDistanceTo(prev.get(1))
+}
+
+// Exact distance with neighbours assuming share communication.
+public def shareRange() {
+	self.nbrRange()
+}
+
+// Time lag with neighbours assuming rep+nbr communication.
+public def repLag() {
+	self.nbrLag() + nbr(self.getDeltaTime())
+}
+
+// Time lag with neighbours assuming share communication.
+public def shareLag() {
+	self.nbrLag()
+}
+
 // SPATIAL FUNCTIONS
 ////////////////////
 

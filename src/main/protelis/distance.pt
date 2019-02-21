@@ -1,25 +1,7 @@
 module distance
 
 import java.lang.Double.*
-import it.unibo.alchemist.custom.CoordinationUtil.*
-
-/**
- * GPS distance with neighbours assuming rep+nbr communication.
- */
-def repRange() {
-	let pos = self.getDevicePosition();
-	let prev = rep (old <- [pos, NaN]) {
-		[pos, old.get(0)]
-	};
-	pos.getDistanceTo(prev.get(1))
-}
-
-/**
- * Time lag with neighbours assuming rep+nbr communication.
- */
-def repLag() {
-	self.nbrLag() + nbr(self.getDeltaTime())
-}
+import utils
 
 /**
  * Bounded Information Speed Distance Estimation, using rep+nbr.
@@ -39,7 +21,6 @@ public def repDistance(source, speed, radius) {
     }
 }
 
-
 /**
  * Bounded Information Speed Distance Estimation, using share.
  *
@@ -51,8 +32,8 @@ public def repDistance(source, speed, radius) {
 public def shareDistance(source, speed, radius) {
     share (old <- [Infinity, Infinity]) {
         mux (source) {[0,0]} else {
-            let dx = old.get(0) + self.nbrRange();
-            let dt = old.get(1) + self.nbrLag();
+            let dx = old.get(0) + shareRange();
+            let dt = old.get(1) + shareLag();
             minHood([max(dx, dt*speed-radius), dt])
         }
     }

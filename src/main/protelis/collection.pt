@@ -1,7 +1,10 @@
 module collection
 
+import java.lang.Double.* 
+import utils
+
 /**
- * Multi-Path Max-Collection, using rep+nbr.
+ * Weighted Multi-Path Max-Collection, using rep+nbr.
  *
  * @param dist   distance from the source
  * @param value  input value
@@ -9,13 +12,14 @@ module collection
  */
 public def repCollection(dist, value) {
     rep (old <- value) {
-        let nbrValues = mux (nbr(dist) > dist) { nbr(old) } else { value };
+    	let threshold = maxHood(mux (nbr(isInfinite(dist))) { 0 } else { (nbr(dist)-dist)/repLag() }) / 2;
+        let nbrValues = mux (nbr(dist) > dist + repLag()*threshold && !isInfinite(nbr(old).get(0))) { nbr(old) } else { value };
         maxHood PlusSelf(nbrValues)
     }
 }
 
 /**
- * Multi-Path Max-Collection, using share.
+ * Weighted Multi-Path Max-Collection, using share.
  *
  * @param dist   distance from the source
  * @param value  input value
@@ -23,7 +27,8 @@ public def repCollection(dist, value) {
  */
 public def shareCollection(dist, value) {
     share (old <- value) {
-        let nbrValues = mux (nbr(dist) > dist) { old } else { value };
+    	let threshold = maxHood(mux (nbr(isInfinite(dist))) { 0 } else { (nbr(dist)-dist)/shareLag() }) / 2;
+        let nbrValues = mux (nbr(dist) > dist + shareLag()*threshold && !isInfinite(old.get(0))) { old } else { value };
         maxHood PlusSelf(nbrValues)
     }
 }
