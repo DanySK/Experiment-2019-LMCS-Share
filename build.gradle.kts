@@ -91,13 +91,13 @@ fun makeTest(
         )
         if (vars.isNotEmpty()) {
             args("-b", "-var", *vars.toTypedArray())
+            tasks {
+                "runTests" {
+                    dependsOn("$name")
+                }
+            }
         } else {
             args("-g", "effects/${file}.aes")
-        }
-    }
-    tasks {
-        "runTests" {
-            dependsOn("$name")
         }
     }
 }
