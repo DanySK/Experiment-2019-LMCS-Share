@@ -102,8 +102,8 @@ fun makeTest(
     }
 }
 
-makeTest("s1_corridor", name = "corridor", sampling = 5.0, time = 300.0, vars = setOf("seed"))
-makeTest("s2_vienna", name = "vienna", sampling = 5.0, time = 600.0, vars = setOf("seed"))
+makeTest("s1_corridor", name = "corridor", sampling = 1.0, time = 300.0, vars = setOf("seed"))
+makeTest("s2_vienna", name = "vienna", sampling = 1.0, time = 600.0, vars = setOf("seed"))
 makeTest("s2_vienna", name = "vienna-gui", sampling = 5.0)
 
 defaultTasks("runTests")

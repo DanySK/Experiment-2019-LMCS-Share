@@ -22,7 +22,7 @@ rectangleWalk([48.205, 16.37], [48.211, 16.38], 40);
 // Get simulation parameters.
 let rate 		= env.get("rate");
 let radius 		= env.get("radius");
-let batchFreq 	= env.get("batchFreq");
+//let batchFreq 	= env.get("batchFreq");
 let rV = 0.4 * radius / rate;
 let sV = 2.0 * radius / rate;
 
@@ -32,8 +32,12 @@ let rL = partitioning2(200, (source) -> {  repDistance(source, rV, radius)});
 let rD = if (rL < 100000) { self.distanceTo(rL) } else { NaN };
 let sD = if (sL < 100000) { self.distanceTo(sL) } else { NaN };
 
-env.put("distance-rep",   meanCounter(max(rD - 200,0), batchFreq));
-env.put("distance-share", meanCounter(max(sD - 200,0), batchFreq));
+//env.put("distance-rep",   meanCounter(max(rD - 200,0), batchFreq));
+//env.put("distance-share", meanCounter(max(sD - 200,0), batchFreq));
+
+// No smoothing
+env.put("distance-rep",   max(rD - 200, 0));
+env.put("distance-share", max(sD - 200, 0));
 
 //env.put("distance-rep",   timeStable(rL));
 //env.put("distance-share", timeStable(sL));
