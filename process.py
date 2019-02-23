@@ -135,9 +135,9 @@ if __name__ == '__main__':
     experiments = ['vienna', 'corridor']
     floatPrecision = '{: 0.2f}'
     seedVars = ['seed']
-    timeSamples = 500
+    timeSamples = 600
     minTime = 0
-    maxTime = 500
+    maxTime = 600
     timeColumnName = 'time'
     logarithmicTime = False
     
@@ -224,29 +224,88 @@ if __name__ == '__main__':
     import matplotlib
     import matplotlib.pyplot as plt
     import matplotlib.cm as cmx
-    figure_size=(6, 4)
-    matplotlib.rcParams.update({'axes.titlesize': 14})
-    matplotlib.rcParams.update({'axes.labelsize': 13})
+    matplotlib.rcParams.update({'axes.titlesize': 12})
+    matplotlib.rcParams.update({'axes.labelsize': 10})
 #    colormap = cmx.viridis
 
     # Prepare selected charts
     # Evaluation of the backoff parameter
-    def makechart(title, ylabel, ydata, colors = None):
+    def makechart(xdata, ydata, title = None, ylabel = None, xlabel = None, colors = None, figure_size = (6, 4)):
         fig = plt.figure(figsize = figure_size)
         ax = fig.add_subplot(1, 1, 1)
         ax.set_title(title)
-        xdata = means['test-sgcg']['time'] / 60
-        ax.set_xlabel("Simulated time (minutes)")
+        ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
 #        ax.set_ylim(0)
         ax.set_xlim(min(xdata), max(xdata))
-        plt.axvline(x=10, color='black', linestyle='dashed')
         index = 0
         for (label, data) in ydata.items():
             ax.plot(xdata, data, label=label, color=colors(index / (len(ydata) - 1)) if colors else None)
             index += 1
         return (fig, ax)
     
+    # Corridor
+    chartseriesdata = means['corridor']
+    xdata = chartseriesdata['time']
+    mixcolormap = lambda x: cmx.winter(x * 2) if x < 0.5 else cmx.YlOrRd((x - 0.5) * 2 * 0.6 + 0.3)
+    divergingmixcolormap = lambda x: cmx.winter(1 - x * 2) if x < 0.5 else cmx.YlOrRd((x - 0.5) * 2 * 0.6 + 0.3)
+    for errtype in ['d', 't']:
+        metric = 'time' if errtype == 't' else 'distance'
+        for testtype in ['single', 'stack']:
+            kinds = ['broadcast', 'collection', 'distance']
+            (fig, ax) = makechart(
+                title = testtype + ' computations, error in ' + metric,
+                xdata = xdata,
+                ydata = { algo + '-' + kind : chartseriesdata[label] for
+                     algo in ['rep', 'share'] for
+                     kind in kinds for
+                     label in [ errtype + 'err-' + testtype + '-' + kind + '-' + algo + '[Mean]'] 
+                },
+                ylabel = metric + " error",
+                xlabel = 'simulated time (s)',
+                figure_size = (6, 3),
+                colors = divergingmixcolormap
+            )
+            ax.set_xlim(0, 300)
+            ax.set_ylim(0, ax.get_ylim()[1] * 1.4)
+            ax.legend(ncol = 2)
+            fig.tight_layout()
+            fig.savefig('corridor-' + errtype + testtype + '.pdf')
+            for kind in kinds:
+                (fig, ax) = makechart(
+                    title = kind + ' computation, ' + testtype + '. Y: ' + metric + ' error. X: simulated time (s).',
+#                    ylabel = metric + " error",
+                    xdata = xdata,
+                    ydata = { algo : chartseriesdata[label] for
+                         algo in ['rep', 'share'] for
+                         label in [ errtype + 'err-' + testtype + '-' + kind + '-' + algo + '[Mean]'] 
+                    },
+                    figure_size = (6, 1.5)
+                )
+#                ax.legend(ncol = 1, bbox_to_anchor=(1, 0.5))
+                ax.set_xlim(0, 300)
+                fig.tight_layout()
+                fig.savefig(errtype + testtype + kind + '.pdf')
     
+    # Vienna
+    chartseriesdata = means['vienna']
+    for metric in ['distance', 'leader']:
+        what = 'distance error' if metric == 'distance' else 'leaders count'
+        (fig, ax) = makechart(
+#            title = what ,
+            ylabel = what,
+            xlabel = 'simulated time (s)',
+            xdata = xdata,
+            ydata = { algo : chartseriesdata[label] for
+                 algo in ['rep', 'share'] for
+                 label in [ metric + '-' + algo + ('[Mean]' if metric == 'distance' else '[CountDistinct]')] 
+            },
+            colors = mixcolormap,
+            figure_size = (6, 3)
+        )
+        ax.legend()
+        ax.set_xlim(0, 500 if metric == 'distance' else 200)
+        fig.tight_layout()
+        fig.savefig('vienna-' + metric + '.pdf')
         
         
