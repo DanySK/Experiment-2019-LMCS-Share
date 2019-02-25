@@ -3,7 +3,11 @@ module s2_vienna
 import java.lang.Double.*
 import utils
 import distance
-import partition
+//import partition
+import protelis:coord:sparsechoice
+import protelis:coord:sharesparsechoice
+import protelis:coord:spreading
+import protelis:coord:sharespreading
 
 // Determines random targets for devices.
 rectangleWalk([48.205, 16.37], [48.211, 16.38], 40);
@@ -16,13 +20,19 @@ let rV = 0.4 * radius / rate;
 let sV = 2.0 * radius / rate;
 
 // Compute Voronoi partitioning and true distances from leaders.
-let sL = partitioning2(200, (source) -> {shareDistance(source, sV, radius)});
-let rL = partitioning2(200, (source) -> {  repDistance(source, rV, radius)});
+//let sL = sharePartitioning2(200, (source) -> {shareDistance(source, sV, radius)}, shareRange);
+//let rL = repPartitioning2(200, (source) -> {  repDistance(source, rV, radius)}, repRange);
+// Compute Voronoi partitioning and true distances from leaders.
+let myid = self.getDeviceUID().getId();
+let sL = shareVoronoiPatitioningWithMetric(shareS(200, shareRange), myid, shareRange);
+let rL = voronoiPatitioningWithMetric(S(200, repRange), myid, shareRange); //shareS(200, repRange);
 let rD = if (rL < 100000) { self.distanceTo(rL) } else { NaN };
 let sD = if (sL < 100000) { self.distanceTo(sL) } else { NaN };
 
 env.put("distance-rep",   max(rD - 200, 0));
 env.put("distance-share", max(sD - 200, 0));
+//env.put("distance-rep",   rD);
+//env.put("distance-share", sD);
 env.put("leader-rep",   rL);
 env.put("leader-share", sL);
 
