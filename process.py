@@ -181,40 +181,43 @@ if __name__ == '__main__':
             dataset = xr.Dataset()
             for k, v in dimensions.items():
                 dataset.coords[k] = v
-            varNames = extractVariableNames(allfiles[0])
-            for v in varNames:
-                if v != timeColumnName:
-                    novals = np.ndarray(shape)
-                    novals.fill(float('nan'))
-                    dataset[v] = (dimensions.keys(), novals)
-            # Compute maximum and minimum time, create the resample
-            timeColumn = varNames.index(timeColumnName)
-            allData = { file: np.matrix(openCsv(file)) for file in allfiles }
-            computeMin = minTime is None
-            computeMax = maxTime is None
-            if computeMax:
-                maxTime = float('-inf')
-                for data in allData.values():
-                    maxTime = max(maxTime, data[-1, timeColumn])
-            if computeMin:
-                minTime = float('inf')
-                for data in allData.values():
-                    minTime = min(minTime, data[0, timeColumn])
-            timeline = timefun(minTime, maxTime, timeSamples)
-            # Resample
-            for file in allData:
-                allData[file] = convert(timeColumn, timeline, allData[file])
-            # Populate the dataset
-            for file, data in allData.items():
-                dataset[timeColumnName] = timeline
-                for idx, v in enumerate(varNames):
+            if len(allfiles) == 0:
+                print("WARNING: No data for experiment " + experiment)
+            else:
+                varNames = extractVariableNames(allfiles[0])
+                for v in varNames:
                     if v != timeColumnName:
-                        darray = dataset[v]
-                        experimentVars = extractCoordinates(file)
-                        darray.loc[experimentVars] = data[:, idx].A1
-            # Fold the dataset along the seed variables, producing the mean and stdev datasets
-            means[experiment] = dataset.mean(seedVars)
-            stdevs[experiment] = dataset.std(seedVars)
+                        novals = np.ndarray(shape)
+                        novals.fill(float('nan'))
+                        dataset[v] = (dimensions.keys(), novals)
+                # Compute maximum and minimum time, create the resample
+                timeColumn = varNames.index(timeColumnName)
+                allData = { file: np.matrix(openCsv(file)) for file in allfiles }
+                computeMin = minTime is None
+                computeMax = maxTime is None
+                if computeMax:
+                    maxTime = float('-inf')
+                    for data in allData.values():
+                        maxTime = max(maxTime, data[-1, timeColumn])
+                if computeMin:
+                    minTime = float('inf')
+                    for data in allData.values():
+                        minTime = min(minTime, data[0, timeColumn])
+                timeline = timefun(minTime, maxTime, timeSamples)
+                # Resample
+                for file in allData:
+                    allData[file] = convert(timeColumn, timeline, allData[file])
+                # Populate the dataset
+                for file, data in allData.items():
+                    dataset[timeColumnName] = timeline
+                    for idx, v in enumerate(varNames):
+                        if v != timeColumnName:
+                            darray = dataset[v]
+                            experimentVars = extractCoordinates(file)
+                            darray.loc[experimentVars] = data[:, idx].A1
+                # Fold the dataset along the seed variables, producing the mean and stdev datasets
+                means[experiment] = dataset.mean(seedVars)
+                stdevs[experiment] = dataset.std(seedVars)
         # Save the datasets
         pickle.dump(means, open(pickleOutput + '_mean', 'wb'), protocol=-1)
         pickle.dump(stdevs, open(pickleOutput + '_std', 'wb'), protocol=-1)
@@ -267,25 +270,27 @@ if __name__ == '__main__':
                 colors = divergingmixcolormap
             )
             ax.set_xlim(0, 300)
-            ax.set_ylim(0, ax.get_ylim()[1] * 1.4)
-            ax.legend(ncol = 2)
+            ax.set_yscale('symlog')
+            ax.set_ylim(0, ax.get_ylim()[1])
+            if metric == 'time' and testtype == 'stack':
+                ax.legend(ncol = 2, loc='lower right')
             fig.tight_layout()
             fig.savefig('corridor-' + errtype + testtype + '.pdf')
-            for kind in kinds:
-                (fig, ax) = makechart(
-                    title = kind + ' computation, ' + testtype + '. Y: ' + metric + ' error. X: simulated time (s).',
-#                    ylabel = metric + " error",
-                    xdata = xdata,
-                    ydata = { algo : chartseriesdata[label] for
-                         algo in ['rep', 'share'] for
-                         label in [ errtype + 'err-' + testtype + '-' + kind + '-' + algo + '[Mean]'] 
-                    },
-                    figure_size = (6, 1.5)
-                )
-#                ax.legend(ncol = 1, bbox_to_anchor=(1, 0.5))
-                ax.set_xlim(0, 300)
-                fig.tight_layout()
-                fig.savefig(errtype + testtype + kind + '.pdf')
+#            for kind in kinds:
+#                (fig, ax) = makechart(
+#                    title = kind + ' computation, ' + testtype + '. Y: ' + metric + ' error. X: simulated time (s).',
+##                    ylabel = metric + " error",
+#                    xdata = xdata,
+#                    ydata = { algo : chartseriesdata[label] for
+#                         algo in ['rep', 'share'] for
+#                         label in [ errtype + 'err-' + testtype + '-' + kind + '-' + algo + '[Mean]'] 
+#                    },
+#                    figure_size = (6, 1.5)
+#                )
+##                ax.legend(ncol = 1, bbox_to_anchor=(1, 0.5))
+#                ax.set_xlim(0, 300)
+#                fig.tight_layout()
+#                fig.savefig(errtype + testtype + kind + '.pdf')
     
     # Vienna
     chartseriesdata = means['vienna']
