@@ -12,7 +12,9 @@ import utils
  */
 public def repCollection(dist, value) {
     rep (old <- value) {
-    	let threshold = maxHood(mux (nbr(isInfinite(dist))) { 0 } else { (nbr(dist)-dist)/repLag() }) / 2;
+    	let threshold = if (dist==0) {0} else {
+    		maxHood(mux (nbr(isInfinite(dist))) { 0 } else { (nbr(dist)-dist)/repLag() }) / 2
+    	};
         let nbrValues = mux (nbr(dist) > dist + repLag()*threshold && !isInfinite(nbr(old).get(0))) { nbr(old) } else { value };
         maxHood PlusSelf(nbrValues)
     }
@@ -27,7 +29,9 @@ public def repCollection(dist, value) {
  */
 public def shareCollection(dist, value) {
     share (old <- value) {
-    	let threshold = maxHood(mux (nbr(isInfinite(dist))) { 0 } else { (nbr(dist)-dist)/shareLag() }) / 2;
+    	let threshold = if (dist == 0) {0} else {
+    		maxHood(mux (nbr(isInfinite(dist))) { 0 } else { (nbr(dist)-dist)/shareLag() }) / 2
+    	};
         let nbrValues = mux (nbr(dist) > dist + shareLag()*threshold && !isInfinite(old.get(0))) { old } else { value };
         maxHood PlusSelf(nbrValues)
     }
