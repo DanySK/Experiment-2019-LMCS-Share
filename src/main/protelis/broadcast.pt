@@ -8,10 +8,10 @@ module broadcast
  * @return       broadcast value
  */
 public def repBroadcast(dist, value) {
-    rep (old <- value) {
-    	let nbrValues = mux (dist == 0) {value} else {nbr(old)};
-    	minHood PlusSelf([nbr(dist), nbrValues]).get(1)
-    }
+    rep (old <- [-Infinity,value]) {
+    	let nbrValues = mux (dist == 0) {[self.getCurrentTime(),value]} else {nbr(old)};
+    	maxHood PlusSelf(nbrValues)
+    }.get(1)
 }
 
 /**
@@ -22,8 +22,8 @@ public def repBroadcast(dist, value) {
  * @return       broadcast value
  */
 public def shareBroadcast(dist, value) {
-    share (old <- value) {
-    	let nbrValues = mux (dist == 0) {value} else {old};
-    	minHood PlusSelf([nbr(dist), nbrValues]).get(1)
-    }
+    share (old <- [-Infinity,value]) {
+    	let nbrValues = mux (dist == 0) {[self.getCurrentTime(),value]} else {old};
+    	maxHood PlusSelf(nbrValues)
+    }.get(1)
 }

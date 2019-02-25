@@ -4,17 +4,6 @@ import java.lang.Double.*
 import utils
 import distance
 import partition
-import protelis:state:time
-
-def timeStable(signal) {
-    rep(ts <- [0, signal]) {
-        if (ts.get(1) == signal) {
-            [ts.get(0) + self.getDeltaTime(), signal]
-        } else {
-            [0, signal]
-        }
-    }.get(0)
-}
 
 // Determines random targets for devices.
 rectangleWalk([48.205, 16.37], [48.211, 16.38], 40);
@@ -32,15 +21,8 @@ let rL = partitioning2(200, (source) -> {  repDistance(source, rV, radius)});
 let rD = if (rL < 100000) { self.distanceTo(rL) } else { NaN };
 let sD = if (sL < 100000) { self.distanceTo(sL) } else { NaN };
 
-//env.put("distance-rep",   meanCounter(max(rD - 200,0), batchFreq));
-//env.put("distance-share", meanCounter(max(sD - 200,0), batchFreq));
-
-// No smoothing
 env.put("distance-rep",   max(rD - 200, 0));
 env.put("distance-share", max(sD - 200, 0));
-
-//env.put("distance-rep",   timeStable(rL));
-//env.put("distance-share", timeStable(sL));
 env.put("leader-rep",   rL);
 env.put("leader-share", sL);
 

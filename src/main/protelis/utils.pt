@@ -12,7 +12,7 @@ public def repRange() {
 	let prev = rep (old <- [pos, NaN]) {
 		[pos, old.get(0)]
 	};
-	pos.getDistanceTo(prev.get(1))
+	pos.getDistanceTo(nbr(prev.get(1)))
 }
 
 // Exact distance with neighbours assuming share communication.

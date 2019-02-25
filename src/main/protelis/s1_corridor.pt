@@ -8,11 +8,8 @@ import broadcast
 
 // Reports the error of a spatio-temporal value. 
 def report(frequency, name, trueval, algoval) {
-//	env.put("derr-" + name, meanCounter(abs(trueval.get(0) - algoval.get(0)), frequency));
-//	env.put("terr-" + name, meanCounter(abs(trueval.get(1) - algoval.get(1)), frequency));
-// No smoothing
-  env.put("derr-" + name, abs(trueval.get(0) - algoval.get(0)));
-  env.put("terr-" + name, abs(trueval.get(1) - algoval.get(1)));
+	env.put("derr-" + name, abs(trueval.get(0) - algoval.get(0)));
+	env.put("terr-" + name, abs(trueval.get(1) - algoval.get(1)));
 }
 
 // The source of distance estimations switches between devices 0 and 1 every 2 minutes.
