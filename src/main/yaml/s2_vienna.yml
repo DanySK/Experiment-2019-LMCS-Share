@@ -13,7 +13,11 @@ variables:
     default: 0
 
   rate: &rate               # period length
-    formula: "1"
+    formula: 1
+  maxrate: &maxrate               # period length
+    formula: $rate * 1.1
+  minrate: &minrate # period length
+    formula: $rate * 0.9
   drate: &drate             # 10% error in period length 
     formula: "0.1 * $rate"
   mrate: &mrate             # frequency of movement steps
@@ -30,13 +34,13 @@ variables:
 export:
  - time
  - molecule: distance-rep
-   aggregators: [mean]
+   aggregators: [mean, max]
    value-filter: onlyfinite
  - molecule: leader-rep
    aggregators: [countdistinct]
    value-filter: onlyfinite
  - molecule: distance-share
-   aggregators: [mean]
+   aggregators: [mean, max]
    value-filter: onlyfinite
  - molecule: leader-share
    aggregators: [countdistinct]
@@ -68,7 +72,7 @@ pools:
 #        type: WeibullDistributedWeibullTime
 #        parameters: [*rate, *drate, *drate]
         type: RandomDiracComb
-        parameters: [0.9, 1.1]
+        parameters: [*minrate, *maxrate]
       type: Event
       actions:
         # run the field calculus program 

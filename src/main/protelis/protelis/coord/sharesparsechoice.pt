@@ -1,0 +1,48 @@
+module protelis:coord:sharesparsechoice
+import protelis:coord:sharespreading
+
+def default() {
+    [Infinity, Infinity]
+}
+
+def breakUsingUids(uid, grain, metric) {
+    share (lead, nbrLead <- uid) {
+        distanceCompetition(distanceToWithMetric(uid == lead, metric), nbrLead, uid, grain, metric)
+    } == uid
+}
+
+def distanceCompetition(d, nbrLead, uid, grain, metric) {
+    mux (d > grain) {
+        uid
+    } else {
+        let thr = 0.25 * grain;
+        mux (d >= thr) {
+            default()
+        } else {
+            mux (d >= thr) {
+                default()
+            } else {
+                minHood PlusSelf(nbrLead)
+            }
+        }
+    }
+}
+
+def randomUid() {
+    rep (v <- [self.nextRandomDouble(), self.getDeviceUID().getId()]) {
+        v
+    }
+}
+
+/**
+ * Devices compete against one another to become local leaders,
+ * resulting  in  a  random  Voronoi  partition  with  a  characteristic
+ * grain size.
+ *
+ * @param grain  num, partition dimension
+ * @param metric () -> num, estimate distance from the leader
+ * @return       bool, true if the current device is the leader, false otherwise
+ */
+public def shareS(grain, metric) {
+    breakUsingUids(randomUid(), grain, metric)
+}
