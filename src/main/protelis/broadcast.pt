@@ -1,5 +1,7 @@
 module broadcast
 
+import utils
+
 /**
  * Broadcast value from a source, using rep+nbr.
  *
@@ -26,4 +28,76 @@ public def shareBroadcast(dist, value) {
     	let nbrValues = mux (dist == 0) {[self.getCurrentTime(),value]} else {old};
     	maxHood PlusSelf(nbrValues)
     }.get(1)
+}
+
+/**
+ * Broadcast value from a source, using rep+nbr.
+ *
+ * @param dist   distance from the source
+ * @param value  input value
+ * @return       broadcast value
+ */
+public def repBroadcast2(dist, value) {
+    Gclassic(dist == 0, value, repRange, i -> { i })
+}
+
+/**
+ * Broadcast value from a source, using share.
+ *
+ * @param dist   distance from the source
+ * @param value  input value
+ * @return       broadcast value
+ */
+public def shareBroadcast2(dist, value) {
+    Gshare(dist == 0, value, shareRange, i -> { i })
+}
+
+public def Gclassic(source, initial, metric, accumulate) {
+    rep (distanceValue <- [Infinity, initial]) {
+        mux (source) {
+            // If the device is a source then G return a 0 potential
+            // and the initial value
+            [0, initial]
+        } else {
+            // The other device potentials are requested
+            let ndv = nbr(distanceValue);
+            // G returns the value related to the minimum potential
+            let minTuple = 
+               minHood([
+                    // potential estimation
+                    ndv.get(0) + metric.apply(),
+                    // values estimation
+                    accumulate.apply(ndv.get(1))
+                ]);
+            if (minTuple.get(0) == Infinity) { // if no neighbors or no path to source
+                [Infinity, initial] // default: reset to initial value
+            } else {
+                minTuple
+            }
+        }
+    }.get(1) // return the accumulated value
+}
+
+public def Gshare(source, initial, metric, accumulate) {
+    share (distanceValue <- [Infinity, initial]) {
+        mux (source) {
+            // If the device is a source then G return a 0 potential
+            // and the initial value
+            [0, initial]
+        } else {
+            // G returns the value related to the minimum potential
+            let minTuple = 
+               minHood([
+                    // potential estimation
+                    distanceValue.get(0) + metric.apply(),
+                    // values estimation
+                    accumulate.apply(distanceValue.get(1))
+                ]);
+            if (minTuple.get(0) == Infinity) { // if no neighbors or no path to source
+                [Infinity, initial] // default: reset to initial value
+            } else {
+                minTuple
+            }
+        }
+    }.get(1) // return the accumulated value
 }

@@ -61,10 +61,14 @@ report(batchFreq,  "stack-collection-share", tM, sM);
 
 
 //// 3) Broadcast maximum (d,t) everywhere, based on exact or estimated values.
-let rtB =   repBroadcast(tD, tM);
-let stB = shareBroadcast(tD, tM);
-let rB  =   repBroadcast(rD, rM);
-let sB  = shareBroadcast(sD, sM);
+let rtB =   repBroadcast2(tD, tM);
+let stB = shareBroadcast2(tD, tM);
+let rB  =   repBroadcast2(rD, rM);
+let sB  = shareBroadcast2(sD, sM);
+env.put("collected-share: ", sM);
+env.put("collected-rep: ", rM);
+env.put("broadcast-share: ", sB);
+env.put("broadcast-rep: ", rB);
 report(batchFreq, "single-broadcast-rep",   tM, rtB);
 report(batchFreq,  "stack-broadcast-rep",   tM, rB);
 report(batchFreq, "single-broadcast-share", tM, stB);
