@@ -309,7 +309,8 @@ if __name__ == '__main__':
             figure_size = (6, 3)
         )
         ax.legend()
-        ax.set_xlim(0, 500 if metric == 'distance' else 200)
+#        ax.set_xlim(0, 500 if metric == 'distance' else 200)
+        ax.set_yscale('symlog')
         fig.tight_layout()
         fig.savefig('vienna-' + metric + '.pdf')
         
