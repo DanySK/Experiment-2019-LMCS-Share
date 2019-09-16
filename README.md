@@ -1,4 +1,4 @@
-# Simulation of Field Calculus-based IoT Applications with Real-Time Guarantees
+# The `share` operator for field-based coordination
 
 Paper published in [COORDINATION 2019: Coordination Models and Languages](https://link.springer.com/chapter/10.1007/978-3-030-22397-7_4/). For any issues with reproducing the experiments, please contact [Danilo Pianini](mailto:danilo.pianini@unibo.it).
 
