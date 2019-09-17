@@ -11,6 +11,9 @@ variables:
     max: 199
     step: 1
     default: 0
+  stage_width: &stage_width
+    type: ArbitraryVariable
+    parameters: [100, [100, 200, 500, 750, 1000, 1500, 2000]]
   rate: &rate               # period length
     formula: "1"
   dspace: &dspace
@@ -23,82 +26,20 @@ variables:
     formula: "$variability*5"
   radius: &radius           # communication radius
     formula: "75"
-  batchFreq: &batchFreq
-    formula: "5"
 
 export:
  - time
- - molecule: derr-single-broadcast-rep
-   aggregators: [mean]
+ - molecule: rep-bcast
+   aggregators: [sum]
    value-filter: onlyfinite
- - molecule: terr-single-broadcast-rep
-   aggregators: [mean]
+ - molecule: rep-ccast
+   aggregators: [sum]
    value-filter: onlyfinite
- - molecule: derr-single-broadcast-share
-   aggregators: [mean]
+ - molecule: share-bcast
+   aggregators: [sum]
    value-filter: onlyfinite
- - molecule: terr-single-broadcast-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-single-collection-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-single-collection-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-single-collection-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-single-collection-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-single-distance-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-single-distance-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-single-distance-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-single-distance-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-stack-broadcast-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-stack-broadcast-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-stack-broadcast-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-stack-broadcast-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-stack-collection-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-stack-collection-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-stack-collection-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-stack-collection-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-stack-distance-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-stack-distance-rep
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: derr-stack-distance-share
-   aggregators: [mean]
-   value-filter: onlyfinite
- - molecule: terr-stack-distance-share
-   aggregators: [mean]
+ - molecule: share-ccast
+   aggregators: [sum]
    value-filter: onlyfinite
 
 seeds:
@@ -138,8 +79,6 @@ pools:
       concentration: *rate
     - molecule: radius
       concentration: *radius
-    - molecule: batchFreq
-      concentration: *batchFreq
 
 displacements:
   - in:                                         # source 1
@@ -150,7 +89,7 @@ displacements:
     contents: *deviceContent
   - in:                                         # source 2
       type: Point
-      parameters: [2000, 100]
+      parameters: [*stage_width, 100]
     programs:
       - *program
     contents: *deviceContent
