@@ -102,6 +102,6 @@ fun makeTest(
     }
 }
 
+makeTest("s1_corridor", name = "ci", sampling = 1.0, time = 10.0, vars = setOf("stage_width"))
 makeTest("s1_corridor", name = "corridor", sampling = 1.0, time = 300.0, vars = setOf("seed", "stage_width"))
-
-defaultTasks("runTests")
+tasks.findByName("ci") ?.enabled = System.getenv("CI")?.toBoolean() ?: false
