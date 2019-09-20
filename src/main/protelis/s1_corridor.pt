@@ -12,6 +12,15 @@ import broadcast
 //	env.put("terr-" + name, abs(trueval.get(1) - algoval.get(1)));
 //}
 
+// Discard inconsistent values after switch
+def compute(sourceId, lambda) {
+	if (sourceId == 0) {
+		lambda.apply()
+	} else {
+		lambda.apply()
+	}
+}
+
 // The source of distance estimations switches between devices 0 and 1 every 2 minutes.
 let myId = self.getDeviceUID().getId();
 let sourceId = if ((self.getCurrentTime()+40) % 240 < 120 ) { 0 } else { 1 };
@@ -31,37 +40,36 @@ let batchFreq 	= env.get("batchFreq");
 let rV = 0.4 * radius / rate;
 let sV = 2.0 * radius / rate;
 
-
-// 1) Computes spatio-temporal distances (d,t), exact and estimations.
-
-// exact
+// oracle
 let trueDistanceTo = self.distanceTo(sourceId);
 let trueTime = self.getCurrentTime();
 // rep-based
 let rDT = repDistance(source, rV, radius);
 let repDistanceTo = rDT.get(0);
-//let rT = tT - rDT.get(1);
-//report(batchFreq, "single-distance-rep", [trueDistanceTo, tT], [repDistanceTo, rT]);
-//report(batchFreq,  "stack-distance-rep", [trueDistanceTo, tT], [repDistanceTo, rT]);
-// share-based
 let sDT = shareDistance(source, sV, radius);
 let shareDistanceTo = sDT.get(0);
-//let sT = tT - sDT.get(1);
-//report(batchFreq, "single-distance-share", [trueDistanceTo, tT], [shareDistanceTo, sT]);
-//report(batchFreq,  "stack-distance-share", [trueDistanceTo, tT], [shareDistanceTo, sT]);
 
 let timeAtSource = if (source) { [myId, trueTime] } else { [-1, NaN] };
-let repBcast = repBroadcast(repDistanceTo, timeAtSource);
-let shareBcast = shareBroadcast(shareDistanceTo, timeAtSource);
+let repBcast = compute(sourceId, () -> { repBroadcast(repDistanceTo, timeAtSource) });
+let shareBcast = compute(sourceId, () -> { shareBroadcast(shareDistanceTo, timeAtSource); });
+let repBcastSingle = compute(sourceId, () -> { repBroadcast(trueDistanceTo, timeAtSource) });
+let shareBcastSingle = compute(sourceId, () -> { shareBroadcast(trueDistanceTo, timeAtSource); });
 env.put("rep-bcast", if (destination && repBcast.get(0) == sourceId) { self.getCurrentTime() - repBcast.get(1) } else { NaN });
 env.put("share-bcast", if (destination && shareBcast.get(0) == sourceId) { self.getCurrentTime() - shareBcast.get(1) } else { NaN });
-//env.put("actual-bcast", trueDistanceTo);
+env.put("rep-bcast-single", if (destination && repBcast.get(0) == sourceId) { self.getCurrentTime() - repBcast.get(1) } else { NaN });
+env.put("share-bcast-single", if (destination && shareBcast.get(0) == sourceId) { self.getCurrentTime() - shareBcast.get(1) } else { NaN });
 
 let accumulate = if (destination) { [myId, trueTime] } else { [-1, NaN] };
-let repCcast = repCollection(repDistanceTo, accumulate);
-let shareCcast = shareCollection(shareDistanceTo, accumulate);
+let repCcast = compute(sourceId, () -> { repCollection(repDistanceTo, accumulate); });
+let shareCcast = compute(sourceId, () -> { shareCollection(shareDistanceTo, accumulate); });
+let repCcastSingle = compute(sourceId, () -> { repCollection(trueDistanceTo, accumulate); });
+let shareCcastSingle = compute(sourceId, () -> { shareCollection(trueDistanceTo, accumulate); });
 env.put("rep-ccast", if (source && repCcast.get(0) == destinationId) { trueTime - repCcast.get(1) } else { NaN });
 env.put("share-ccast", if (source && shareCcast.get(0) == destinationId) { trueTime - shareCcast.get(1) } else { NaN });
+env.put("rep-ccast-single", if (source && repCcast.get(0) == destinationId) { trueTime - repCcast.get(1) } else { NaN });
+env.put("share-ccast-single", if (source && shareCcast.get(0) == destinationId) { trueTime - shareCcast.get(1) } else { NaN });
+
+// Useful for debugging purposes
 //env.put("actual-time", trueTime);
 //env.put("raw-rc", repCcast);
 //env.put("raw-rb", repBcast);
