@@ -71,7 +71,7 @@ def extractCoordinates(filename):
 
     """
     with open(filename, 'r') as file:
-        regex = re.compile(' (?P<varName>[a-zA-Z]+) = (?P<varValue>[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?),?')
+        regex = re.compile(' (?P<varName>[a-zA-Z._-]+) = (?P<varValue>[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?),?')
         dataBegin = re.compile('\d')
         for line in file:
             match = regex.findall(line)
@@ -132,12 +132,12 @@ if __name__ == '__main__':
     # CONFIGURE SCRIPT
     directory = 'data'
     pickleOutput = 'data_summary'
-    experiments = ['vienna', 'corridor']
-    floatPrecision = '{: 0.2f}'
+    experiments = ['corridor']
+    floatPrecision = '{: 0.3f}'
     seedVars = ['seed']
     timeSamples = 600
     minTime = 0
-    maxTime = 600
+    maxTime = 300
     timeColumnName = 'time'
     logarithmicTime = False
     
@@ -233,7 +233,7 @@ if __name__ == '__main__':
 
     # Prepare selected charts
     # Evaluation of the backoff parameter
-    def makechart(xdata, ydata, title = None, ylabel = None, xlabel = None, colors = None, figure_size = (6, 4)):
+    def makechart(xdata, ydata, title = None, ylabel = None, xlabel = None, colors = None, linewidth = 1, errlinewidth = 0.5, figure_size = (6, 4)):
         fig = plt.figure(figsize = figure_size)
         ax = fig.add_subplot(1, 1, 1)
         ax.set_title(title)
@@ -242,76 +242,67 @@ if __name__ == '__main__':
 #        ax.set_ylim(0)
         ax.set_xlim(min(xdata), max(xdata))
         index = 0
-        for (label, data) in ydata.items():
-            ax.plot(xdata, data, label=label, color=colors(index / (len(ydata) - 1)) if colors else None)
+        for (label, (data, error)) in ydata.items():
+            ax.plot(xdata, data, label=label, color=colors(index / (len(ydata) - 1)) if colors else None, linewidth=linewidth)
+            ax.plot(xdata, data+error, label=None, color=colors(index / (len(ydata) - 1)) if colors else None, linewidth=errlinewidth)
+            ax.plot(xdata, data-error, label=None, color=colors(index / (len(ydata) - 1)) if colors else None, linewidth=errlinewidth)
             index += 1
         return (fig, ax)
     
-    # Corridor
-    chartseriesdata = means['corridor']
-    xdata = chartseriesdata['time']
+    # CHART set 1: broadcast-time + ccast-time
+    # CHART set 2: performance w.r.t. stage width
+    allwidths = means['corridor']
+    data_by_time = allwidths.sel(stage_width=2000)
+    data_by_width = allwidths.mean('time')
+    charterrordata = stdevs['corridor']
     mixcolormap = lambda x: cmx.winter(x * 2) if x < 0.5 else cmx.YlOrRd((x - 0.5) * 2 * 0.6 + 0.3)
     divergingmixcolormap = lambda x: cmx.winter(1 - x * 2) if x < 0.5 else cmx.YlOrRd((x - 0.5) * 2 * 0.6 + 0.3)
-    for errtype in ['d', 't']:
-        metric = 'time' if errtype == 't' else 'distance'
-        for testtype in ['single', 'stack']:
-            kinds = ['broadcast', 'collection', 'distance']
-            (fig, ax) = makechart(
-                title = testtype + ' computations, error in ' + metric,
-                xdata = xdata,
-                ydata = { algo + '-' + kind : chartseriesdata[label] for
-                     algo in ['rep', 'share'] for
-                     kind in kinds for
-                     label in [ errtype + 'err-' + testtype + '-' + kind + '-' + algo + '[Mean]'] 
-                },
-                ylabel = metric + " error",
-                xlabel = 'simulated time (s)',
-                figure_size = (6, 3),
-                colors = divergingmixcolormap
-            )
-            ax.set_xlim(0, 300)
-            ax.set_yscale('symlog')
-            ax.set_ylim(0, ax.get_ylim()[1])
-            if metric == 'time' and testtype == 'stack':
-                ax.legend(ncol = 2, loc='lower right')
-            fig.tight_layout()
-            fig.savefig('corridor-' + errtype + testtype + '.pdf')
-#            for kind in kinds:
-#                (fig, ax) = makechart(
-#                    title = kind + ' computation, ' + testtype + '. Y: ' + metric + ' error. X: simulated time (s).',
-##                    ylabel = metric + " error",
-#                    xdata = xdata,
-#                    ydata = { algo : chartseriesdata[label] for
-#                         algo in ['rep', 'share'] for
-#                         label in [ errtype + 'err-' + testtype + '-' + kind + '-' + algo + '[Mean]'] 
-#                    },
-#                    figure_size = (6, 1.5)
-#                )
-##                ax.legend(ncol = 1, bbox_to_anchor=(1, 0.5))
-#                ax.set_xlim(0, 300)
-#                fig.tight_layout()
-#                fig.savefig(errtype + testtype + kind + '.pdf')
-    
-    # Vienna
-    chartseriesdata = means['vienna']
-    for metric in ['distance', 'leader']:
-        what = 'distance error' if metric == 'distance' else 'leaders count'
-        (fig, ax) = makechart(
-#            title = what ,
-            ylabel = what,
-            xlabel = 'simulated time (s)',
-            xdata = xdata,
-            ydata = { algo : chartseriesdata[label] for
-                 algo in ['rep', 'share'] for
-                 label in [ metric + '-' + algo + ('[Mean]' if metric == 'distance' else '[CountDistinct]')] 
+    for algorithm in ['b', 'c']:
+        # wrt time
+        fig, ax = makechart(
+            xdata = data_by_time['time'],
+            ydata = {
+                primitive + kind : (
+                    data_by_time[label],
+                    stdevs['corridor'].sel(stage_width=2000)[label]
+                )
+                for label, primitive, kind in (
+                    (primitive + "-" + algorithm + "cast" + kind + "[Sum]", primitive, kind)
+                    for primitive in ['rep', 'share']
+                    for kind in ["-single", ""]
+                )
             },
+            ylabel = "Packet delay (s)",
+            xlabel = "Simulation time (s)",
+            figure_size = (6, 3),
             colors = mixcolormap,
-            figure_size = (6, 3)
+            linewidth = 1.5,
+            title = "rep vs. share performance, " + ("broadcast" if algorithm == 'b' else 'accumulation')
         )
         ax.legend()
-#        ax.set_xlim(0, 500 if metric == 'distance' else 200)
-        ax.set_yscale('symlog')
         fig.tight_layout()
-        fig.savefig('vienna-' + metric + '.pdf')
-        
+        fig.savefig("delay-" + algorithm + ".pdf")
+        fig, ax = makechart(
+            xdata = data_by_width['stage_width'],
+            ydata = {
+                primitive + kind : (
+                    data_by_width[label],
+                    stdevs['corridor'].mean('time')[label]
+                )
+                for label, primitive, kind in (
+                    (primitive + "-" + algorithm + "cast" + kind + "[Sum]", primitive, kind)
+                    for primitive in ['rep', 'share']
+                    for kind in ["-single", ""]
+                )
+            },
+            ylabel = "Packet delay (s)",
+            xlabel = "Distance between source and destination (m)",
+            figure_size = (6, 3),
+            colors = mixcolormap,
+            linewidth = 1.5,
+            title = "rep vs. share performance, " + ("broadcast" if algorithm == 'b' else 'accumulation')
+        )
+        ax.legend()
+        fig.tight_layout()
+        fig.savefig("width-" + algorithm + ".pdf")
         
