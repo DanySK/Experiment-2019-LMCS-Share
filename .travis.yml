@@ -28,12 +28,12 @@ before_install:
   - curl "${GRAVIS}.install-jdk-travis.sh" --output ~/.install-jdk-travis.sh
   # Download, install, configue the JDK, and export the configuration to the current shell
   - source ~/.install-jdk-travis.sh
-install: true
-script:
+install:
+  - update-alternatives --install /usr/bin/python python /usr/bin/python3 10
   - python -m venv venv
   - source e venv/bin/activate
   - pip install --upgrade pip
   - pip install -r requirements.txt
+script:
   - python process.py
-  - deactivate
   - ./gradlew ci
