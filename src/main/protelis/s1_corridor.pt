@@ -56,8 +56,8 @@ let repBcastSingle = compute(sourceId, () -> { repBroadcast(trueDistanceTo, time
 let shareBcastSingle = compute(sourceId, () -> { shareBroadcast(trueDistanceTo, timeAtSource); });
 env.put("rep-bcast", if (destination && repBcast.get(0) == sourceId) { self.getCurrentTime() - repBcast.get(1) } else { NaN });
 env.put("share-bcast", if (destination && shareBcast.get(0) == sourceId) { self.getCurrentTime() - shareBcast.get(1) } else { NaN });
-env.put("rep-bcast-single", if (destination && repBcast.get(0) == sourceId) { self.getCurrentTime() - repBcast.get(1) } else { NaN });
-env.put("share-bcast-single", if (destination && shareBcast.get(0) == sourceId) { self.getCurrentTime() - shareBcast.get(1) } else { NaN });
+env.put("rep-bcast-single", if (destination && repBcast.get(0) == sourceId) { self.getCurrentTime() - repBcastSingle.get(1) } else { NaN });
+env.put("share-bcast-single", if (destination && shareBcast.get(0) == sourceId) { self.getCurrentTime() - shareBcastSingle.get(1) } else { NaN });
 
 let accumulate = if (destination) { [myId, trueTime] } else { [-1, NaN] };
 let repCcast = compute(sourceId, () -> { repCollection(repDistanceTo, accumulate); });
@@ -66,8 +66,8 @@ let repCcastSingle = compute(sourceId, () -> { repCollection(trueDistanceTo, acc
 let shareCcastSingle = compute(sourceId, () -> { shareCollection(trueDistanceTo, accumulate); });
 env.put("rep-ccast", if (source && repCcast.get(0) == destinationId) { trueTime - repCcast.get(1) } else { NaN });
 env.put("share-ccast", if (source && shareCcast.get(0) == destinationId) { trueTime - shareCcast.get(1) } else { NaN });
-env.put("rep-ccast-single", if (source && repCcast.get(0) == destinationId) { trueTime - repCcast.get(1) } else { NaN });
-env.put("share-ccast-single", if (source && shareCcast.get(0) == destinationId) { trueTime - shareCcast.get(1) } else { NaN });
+env.put("rep-ccast-single", if (source && repCcast.get(0) == destinationId) { trueTime - repCcastSingle.get(1) } else { NaN });
+env.put("share-ccast-single", if (source && shareCcast.get(0) == destinationId) { trueTime - shareCcastSingle.get(1) } else { NaN });
 
 // Useful for debugging purposes
 //env.put("actual-time", trueTime);
