@@ -5,7 +5,6 @@ language: bash
 os:
   - linux
   - osx
-  - windows
 env:
   global:
     # This is a convenience variable for shortening download commands
