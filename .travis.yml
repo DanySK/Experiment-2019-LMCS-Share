@@ -5,6 +5,8 @@ language: bash
 os:
   - linux
   - osx
+dist: bionic
+osx_image: xcode11
 env:
   global:
     # This is a convenience variable for shortening download commands
@@ -30,6 +32,7 @@ install: true
 script:
   - python -m venv venv
   - source e venv/bin/activate
+  - pip install --upgrade pip
   - pip install -r requirements.txt
   - python process.py
   - deactivate
