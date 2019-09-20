@@ -14,6 +14,7 @@ env:
     # dramatically, also during cache setup. From a Tanzinul Islam's idea: http://bit.ly/348VPYS,
     # This work around disables it before caching
     - NO_WIN_DEFENDER=$(curl "${GRAVIS}.disable-windows-defender.sh" --output .no-defender.sh && source .no-defender.sh)
+    - TERM=dumb
   matrix:
     # List any JDK you want to build your software with.
     # You can see the list of supported environments by installing Jabba and using ls-remote:
