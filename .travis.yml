@@ -1,7 +1,9 @@
 # Java is not yet supported on Windows, so the build would block.
 # You do not need any setup from Travis, use a plain bash build
-language: bash
-# Enable them all, if you need them.
+language: python
+python:
+  - "3.7"
+  - "3.6"
 os:
   - linux
   - osx
@@ -29,9 +31,6 @@ before_install:
   # Download, install, configue the JDK, and export the configuration to the current shell
   - source ~/.install-jdk-travis.sh
 install:
-  - uname | grep Linux && sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
-  - python -m venv venv
-  - source e venv/bin/activate
   - pip install --upgrade pip
   - pip install -r requirements.txt
 script:
