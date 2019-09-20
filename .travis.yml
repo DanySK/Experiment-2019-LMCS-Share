@@ -28,4 +28,9 @@ before_install:
   - source ~/.install-jdk-travis.sh
 install: true
 script:
+  - python -m venv venv
+  - source e venv/bin/activate
+  - pip install -r requirements.txt
+  - python process.py
+  - deactivate
   - ./gradlew ci
