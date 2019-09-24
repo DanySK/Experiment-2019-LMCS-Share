@@ -49,7 +49,7 @@ env.put("share-bcast-single", if (destination && shareBcastSingle.get(0) == sour
 let accumulateRep = if (destination) { [repDSource, trueTime] } else { [-Infinity, NaN] };
 let accumulateShare = if (destination) { [shareDSource, trueTime] } else { [-Infinity, NaN] };
 let accumulateOracle = if (destination) { [sourceId, trueTime] } else { [-Infinity, NaN] };
-let repCcast = repCollection(repDistanceTo, accumulateRep)
+let repCcast = repCollection(repDistanceTo, accumulateRep);
 let shareCcast = shareCollection(shareDistanceTo, accumulateShare);
 let repCcastSingle = repCollection(trueDistanceTo, accumulateOracle);
 let shareCcastSingle = shareCollection(trueDistanceTo, accumulateOracle);
