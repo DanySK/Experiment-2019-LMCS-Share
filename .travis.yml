@@ -45,6 +45,6 @@ deploy:
     file: "*.pdf"
     skip_cleanup: true
     on:
-      repo: DanySK/Course-DevOps-for-scientific-research
+      repo: DanySK/Experiment-2019-LMCS-Share
       tags: false
       condition: "$JDK = adopt@1.11"
