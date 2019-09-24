@@ -296,7 +296,7 @@ if __name__ == '__main__':
                     for kind in ["-single", ""]
                 )
             },
-            ylabel = "Packet delay (s)",
+            ylabel = "Mean packet delay (s)",
             xlabel = "Distance between source and destination (m)",
             figure_size = (6, 3),
             colors = mixcolormap,
