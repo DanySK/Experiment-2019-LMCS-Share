@@ -1,37 +1,48 @@
-# Java is not yet supported on Windows, so the build would block.
-# You do not need any setup from Travis, use a plain bash build
 language: python
 python:
-  - "3.7"
+- '3.7'
 os:
-  - linux
-#  - osx
+- linux
 dist: bionic
-#osx_image: xcode11
 env:
   global:
-    # This is a convenience variable for shortening download commands
-    - GRAVIS="https://raw.githubusercontent.com/DanySK/Gravis-CI/master/"
-    # If you use Windows, you may want to disable Windows Defender. It slows down the builds
-    # dramatically, also during cache setup. From a Tanzinul Islam's idea: http://bit.ly/348VPYS,
-    # This work around disables it before caching
-    - NO_WIN_DEFENDER=$(curl "${GRAVIS}.disable-windows-defender.sh" --output .no-defender.sh && source .no-defender.sh)
-    - TERM=dumb
+  - GRAVIS="https://raw.githubusercontent.com/DanySK/Gravis-CI/master/"
+  - NO_WIN_DEFENDER=$(curl "${GRAVIS}.disable-windows-defender.sh" --output .no-defender.sh
+    && source .no-defender.sh)
+  - TERM=dumb
   matrix:
-    # List any JDK you want to build your software with.
-    # You can see the list of supported environments by installing Jabba and using ls-remote:
-    # https://github.com/shyiko/jabba#usage
-    - JDK="adopt@1.11"
-    - JDK="adopt-openj9@1.11"
-    - JDK="amazon-corretto@1.11"
+  - JDK="adopt@1.11"
+  - JDK="adopt-openj9@1.11"
+  - JDK="amazon-corretto@1.11"
 before_install:
-  # Download the script
-  - curl "${GRAVIS}.install-jdk-travis.sh" --output ~/.install-jdk-travis.sh
-  # Download, install, configue the JDK, and export the configuration to the current shell
-  - source ~/.install-jdk-travis.sh
+- curl "${GRAVIS}.install-jdk-travis.sh" --output ~/.install-jdk-travis.sh
+- source ~/.install-jdk-travis.sh
 install:
-  - pip install --upgrade pip
-  - pip install -r requirements.txt
+- pip install --upgrade pip
+- pip install -r requirements.txt
 script:
-  - python process.py
-  - ./gradlew ci
+- python process.py
+- "./gradlew ci"
+before_deploy:
+- git config --local user.name "Danilo Pianini"
+- git config --local user.email "danilo.pianini@unibo.it"
+- if [[ $(git describe) == *"-"* ]]; then git tag $(git describe) || :; fi
+deploy:
+  - provider: releases
+    api_key:
+        secure: XK3CkWD2tUwV83maEjkBNRJypP1ExYxFNo5Zbex9Y4gbA3bqqCirwPhWF+oiEGsibZq6EyTHKogDJ2hQPGtz45SarcCKEE1eQhvZ4ikMGaWn9lZQkrBy7mVSKBvXtbKj1s9/Ylv7vsmuF/nHLPsuvgSUuI7ZpF//p1ROFwvXEH37jv2Z9Kmf02zxGi1R0tyLzxwXv6mmv5Bh0N2MgLbdIHoZyeckHry0M/wmapErYNeY8hMQFlvatD3pdT/Pr1cfYh0InjKXDAfsJWvCgR1ehtFt5WoNR8Pa9NSqDyrK1uNoWt4wgLyjXuIcbnj5LCgpSV3qU02krhqRmAT3iiCRvF2KTg5uGEfu8K+Et8LPVSv0SuQDxe+xwaYuSAlf4WkigVb7lAvafuRitwJDbSaww1qrmsD62p1HyGZNwkghE63xA2Y6AWvtFmfRdKDPM6fvpd0W1w85kVdMLzqM885XxW5dycBYzeI/ytEeGJzHSsDpVIA89A5pCUIURK7YFZXFZQnxYZoGQeSivYC4K5V7m0KVEsqJy9f/S1ScZSbrQGpwiNP6FSi3ydZ3dQR6YkmoZZfjqnw32rTwZ4jnz7V8XD5R0a+yc9OGtvKtKAqf/bfQdj67pyhZfsLuECbPqpwU3FwPwJWs7rb5skTYgzBZZuz55xYekdbqrO/D0VDsdJ0=
+    file_glob: true
+    skip_cleanup: true
+    file: "*.pdf"
+    on:
+        repo: DanySK/Experiment-2019-LMCS-Share
+        tags: true
+  - provider: releases
+    api_key:
+      secure: m2NCvHgkQJ8SuoYK35wzwZuZzX9nmXmZyTaRa+pXWC8y4XQmbhf9L4YPCz2dBJG9OCCjoEBNwVNQsJuxNZsRaBL/81DBDAfsFKWNedZ2yp3Ij1CRZV3fo9lOE19cx+N6Ae89mPvOz5HYSn+FUETMOPxXGsZduvB1nQsHxA0pemTSaQzpTvVY/rKUCEVW5LP1Be9/Z5Ck3+VXn/rNFr7pylPagqarvA3bKz36YmrjIc2q2GaF/MyEBAJsHVvNrBuzgtSNzu1qEI0oDl4lvOExCWcJ+x1pWz4O7ffWZrDMeIhWDVPVnW2ppjD67ZQfYRYqx6uYtEBOJrL64ILw1zHHV+IPHqynbQ9JLwd6gWYpd04AqC/IjJvcXdlkTVhi1aNazLT2aIjiYXQScA85MtwpmTNPF7kImcGFXbZo4fOX3b2iDWG5d1rm51xiXDnanIKcKwl7JvtvYHrOyeuv7idn9gr5ukQv6SpMG3TkUIsDa3qpC/3OTQFTp7Kgyh5IFPUo14M45S214IedYsqO96+2d/rqZ/GOrqwTdLQ/np90J0zGS7gZKNt5d/UyUYI9qqyNNsa6DTx+eTJtkBZVJ+BVn8S833B9vNCQMVUwzlh7LqiV5mBNIFVdWi4OlccskSk2BBWty/0n9DrLUOUJqoxaiXR2rlhgnKkThT2yltrQBwE=
+    file_glob: true
+    file: "*.pdf"
+    skip_cleanup: true
+    on:
+      repo: DanySK/Course-DevOps-for-scientific-research
+      tags: false
