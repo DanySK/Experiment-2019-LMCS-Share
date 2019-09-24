@@ -206,6 +206,7 @@ if __name__ == '__main__':
                 timeline = timefun(minTime, maxTime, timeSamples)
                 # Resample
                 for file in allData:
+#                    print(file)
                     allData[file] = convert(timeColumn, timeline, allData[file])
                 # Populate the dataset
                 for file, data in allData.items():
@@ -216,8 +217,8 @@ if __name__ == '__main__':
                             experimentVars = extractCoordinates(file)
                             darray.loc[experimentVars] = data[:, idx].A1
                 # Fold the dataset along the seed variables, producing the mean and stdev datasets
-                means[experiment] = dataset.mean(seedVars)
-                stdevs[experiment] = dataset.std(seedVars)
+                means[experiment] = dataset.mean(dim = seedVars, skipna=True)
+                stdevs[experiment] = dataset.std(dim = seedVars, skipna=True)
         # Save the datasets
         pickle.dump(means, open(pickleOutput + '_mean', 'wb'), protocol=-1)
         pickle.dump(stdevs, open(pickleOutput + '_std', 'wb'), protocol=-1)
@@ -302,6 +303,7 @@ if __name__ == '__main__':
             linewidth = 1.5,
             title = "rep vs. share performance, " + ("broadcast" if algorithm == 'b' else 'accumulation')
         )
+#        ax.set_xscale('log')
         ax.legend()
         fig.tight_layout()
         fig.savefig("width-" + algorithm + ".pdf")
