@@ -11,12 +11,13 @@ import utils
  * @param radius  communication radius
  * @return        estimated distance in space and time
  */
-public def repDistance(source, speed, radius) {
-    rep (old <- [Infinity, Infinity]) {
-        mux (source) {[0,0]} else {
+public def repDistance(source, speed, radius, myId) {
+    rep (old <- [Infinity, Infinity, NaN]) {
+        mux (source) {[0,0, myId]} else {
             let dx = nbr(old.get(0)) + repRange();
             let dt = nbr(old.get(1)) + repLag();
-            minHood([max(dx, dt*speed-radius), dt])
+            let ids = nbr(old.get(2));
+            minHood([max(dx, dt*speed-radius), dt, ids])
         }
     }
 }
@@ -29,12 +30,13 @@ public def repDistance(source, speed, radius) {
  * @param radius  communication radius
  * @return        estimated distance in space and time
  */
-public def shareDistance(source, speed, radius) {
-    share (old <- [Infinity, Infinity]) {
-        mux (source) {[0,0]} else {
+public def shareDistance(source, speed, radius, myId) {
+    share (old <- [Infinity, Infinity, NaN]) {
+        mux (source) {[0,0, myId]} else {
             let dx = old.get(0) + shareRange();
             let dt = old.get(1) + shareLag();
-            minHood([max(dx, dt*speed-radius), dt])
+            let ids = old.get(2);
+            minHood([max(dx, dt*speed-radius), dt, ids])
         }
     }
 }
