@@ -24,7 +24,7 @@ def log(shouldLog, trueTime, loggedTime, switchTime) {
 let myId = self.getDeviceUID().getId();
 let switchTime = 120;
 let trueTime = self.getCurrentTime();
-let sourceId = if ((trueTime+40) % switchTime * 2 < switchTime ) { 0 } else { 1 };
+let sourceId = if ((trueTime+40) % (switchTime * 2) < switchTime ) { 0 } else { 1 };
 let destinationId = (sourceId + 1) % 2;
 let source = myId == sourceId;
 let destination = myId == destinationId;
