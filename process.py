@@ -253,7 +253,8 @@ if __name__ == '__main__':
     # CHART set 1: broadcast-time + ccast-time
     # CHART set 2: performance w.r.t. stage width
     allwidths = means['corridor']
-    data_by_time = allwidths.sel(stage_width=2000)
+    reference_stage_width = 2000
+    data_by_time = allwidths.sel(stage_width=reference_stage_width)
     data_by_width = allwidths.mean('time')
     charterrordata = stdevs['corridor']
     mixcolormap = lambda x: cmx.winter(x * 2) if x < 0.5 else cmx.YlOrRd((x - 0.5) * 2 * 0.6 + 0.3)
@@ -265,7 +266,7 @@ if __name__ == '__main__':
             ydata = {
                 primitive + kind : (
                     data_by_time[label],
-                    stdevs['corridor'].sel(stage_width=2000)[label]
+                    stdevs['corridor'].sel(stage_width=reference_stage_width)[label]
                 )
                 for label, primitive, kind in (
                     (primitive + "-" + algorithm + "cast" + kind + "[Sum]", primitive, kind)
