@@ -6,9 +6,25 @@ import distance
 import collection
 import broadcast
 
+/*
+ * Discards packets whose lag is not compatible with the experiment configuration.
+ * time must be assigned to the switch time
+ */
+def boundLag(value, time) {
+	if (value < time) { value } else { NaN }
+}
+def log(shouldLog, trueTime, loggedTime, switchTime) {
+	if (shouldLog) {
+		boundLag(trueTime - loggedTime, switchTime)
+	} else {
+		NaN
+	}
+}
 // The source of distance estimations switches between devices 0 and 1 every 2 minutes.
 let myId = self.getDeviceUID().getId();
-let sourceId = if ((self.getCurrentTime()+40) % 240 < 120 ) { 0 } else { 1 };
+let switchTime = 120;
+let trueTime = self.getCurrentTime();
+let sourceId = if ((trueTime+40) % switchTime * 2 < switchTime ) { 0 } else { 1 };
 let destinationId = (sourceId + 1) % 2;
 let source = myId == sourceId;
 let destination = myId == destinationId;
@@ -27,7 +43,6 @@ let sV = 2.0 * radius / rate;
 
 // oracle
 let trueDistanceTo = self.distanceTo(sourceId);
-let trueTime = self.getCurrentTime();
 // rep-based
 let rDT = repDistance(source, rV, radius, myId);
 let repDistanceTo = rDT.get(0);
@@ -41,10 +56,10 @@ let repBcast = repBroadcast(repDistanceTo, timeAtSource);
 let shareBcast = shareBroadcast(shareDistanceTo, timeAtSource);
 let repBcastSingle = repBroadcast(trueDistanceTo, timeAtSource);
 let shareBcastSingle = shareBroadcast(trueDistanceTo, timeAtSource);
-env.put("rep-bcast", if (destination && repBcast.get(0) == sourceId) { self.getCurrentTime() - repBcast.get(1) } else { NaN });
-env.put("share-bcast", if (destination && shareBcast.get(0) == sourceId) { self.getCurrentTime() - shareBcast.get(1) } else { NaN });
-env.put("rep-bcast-single", if (destination && repBcastSingle.get(0) == sourceId) { self.getCurrentTime() - repBcastSingle.get(1) } else { NaN });
-env.put("share-bcast-single", if (destination && shareBcastSingle.get(0) == sourceId) { self.getCurrentTime() - shareBcastSingle.get(1) } else { NaN });
+env.put("rep-bcast", log(destination && repBcast.get(0) == sourceId, trueTime, repBcast.get(1), switchTime));
+env.put("share-bcast", log(destination && shareBcast.get(0) == sourceId, trueTime, shareBcast.get(1), switchTime));
+env.put("rep-bcast-single", log(destination && repBcastSingle.get(0) == sourceId, trueTime, repBcastSingle.get(1), switchTime));
+env.put("share-bcast-single", log(destination && shareBcastSingle.get(0) == sourceId, trueTime, shareBcastSingle.get(1), switchTime));
 
 let accumulateRep = if (destination) { [repDSource, trueTime] } else { [-Infinity, NaN] };
 let accumulateShare = if (destination) { [shareDSource, trueTime] } else { [-Infinity, NaN] };
@@ -53,10 +68,10 @@ let repCcast = repCollection(repDistanceTo, accumulateRep);
 let shareCcast = shareCollection(shareDistanceTo, accumulateShare);
 let repCcastSingle = repCollection(trueDistanceTo, accumulateOracle);
 let shareCcastSingle = shareCollection(trueDistanceTo, accumulateOracle);
-env.put("rep-ccast", if (source && repCcast.get(0) == sourceId) { trueTime - repCcast.get(1) } else { NaN });
-env.put("share-ccast", if (source && shareCcast.get(0) == sourceId) { trueTime - shareCcast.get(1) } else { NaN });
-env.put("rep-ccast-single", if (source && repCcastSingle.get(0) == sourceId) { trueTime - repCcastSingle.get(1) } else { NaN });
-env.put("share-ccast-single", if (source && shareCcastSingle.get(0) == sourceId) { trueTime - shareCcastSingle.get(1) } else { NaN });
+env.put("rep-ccast", log(source && repCcast.get(0) == sourceId, trueTime, repCcast.get(1), switchTime));
+env.put("share-ccast", log(source && shareCcast.get(0) == sourceId, trueTime, shareCcast.get(1), switchTime));
+env.put("rep-ccast-single", log(source && repCcastSingle.get(0) == sourceId, trueTime, repCcastSingle.get(1), switchTime));
+env.put("share-ccast-single", log(source && shareCcastSingle.get(0) == sourceId, trueTime, shareCcastSingle.get(1), switchTime));
 
 // Useful for debugging purposes
 //env.put("actual-time", trueTime);
