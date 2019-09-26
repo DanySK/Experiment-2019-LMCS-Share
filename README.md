@@ -63,15 +63,3 @@ To execute it, issue:
 
 Charts used in the paper will be generated as pdf files.
 If executed in a interactive Python environment, such as Spyder 3, the script will also plot on console a number of other charts.
-
-## Tested platforms
-
-We successfully ran the experiments with the following systems:
-
-#### Tests successfully executed, charts correctly generated
-
-  * Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz
-  * 32GB RAM
-  * Linux 4.20.5-arch1-1-ARCH #1 SMP PREEMPT x86_64 GNU/Linux
-  * OpenJDK Runtime Environment (build 1.8.0_202-b26) OpenJDK 64-Bit Server VM (build 25.202-b26, mixed mode)
-  * Python 3.7.2
