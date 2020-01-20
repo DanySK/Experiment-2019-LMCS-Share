@@ -13,7 +13,7 @@ env:
   matrix:
   - JDK="adopt@1.11"
   - JDK="adopt-openj9@1.11"
-  - JDK="amazon-corretto@1.11"
+#  - JDK="amazon-corretto@1.11"
 before_install:
 - curl "${GRAVIS}.install-jdk-travis.sh" --output ~/.install-jdk-travis.sh
 - source ~/.install-jdk-travis.sh
